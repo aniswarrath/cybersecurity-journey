@@ -1,13 +1,10 @@
-pin = 1234
-attempts = 0
-while attempts < 3 :
-    guess = int(input("Enter the pin number"))
-    attempts += 1
-
-    if pin == guess :
-        print ("Access granted!")
-        break
-    elif attempts < 3:
-        print (f"Wrong pin, {3-attempts} attempts remaining.")
+def check_username (username) :
+    if len(username) < 3 :
+        return "Too short"
+    elif len(username) > 15 :
+        return "Too long"
     else :
-        print("Card blocked")
+        return "valid"
+    
+username = (input("Enter a username: "))
+print(check_username(username))
