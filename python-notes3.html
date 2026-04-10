@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 40px; font-size: 13px; max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 6px; }
+  h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; background: #1a1a1a; padding: 6px 10px; margin: 28px 0 10px 0; }
+  h3 { font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 16px 0 6px 0; border-left: 3px solid #1a1a1a; padding-left: 8px; }
+  p { font-size: 13px; line-height: 1.7; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th { background: #f5f5f5; padding: 6px 10px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; }
+  td { padding: 5px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  td:first-child { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
+  code { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  .note { background: #fffbe6; border-left: 3px solid #f0c000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .danger { background: #fff0f0; border-left: 3px solid #cc0000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .tip { background: #f0f7ff; border-left: 3px solid #0066cc; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .green { background: #f0fff4; border-left: 3px solid #00aa44; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .subtitle { color: #666; font-size: 12px; margin-bottom: 30px; }
+  .footer { margin-top: 40px; padding-top: 15px; border-top: 2px solid #1a1a1a; font-size: 11px; color: #666; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<h1>Python Notes — Part 3 · Part 19 to Current</h1>
+<div class="subtitle">Aniswar Rath &nbsp;|&nbsp; April 2026 &nbsp;|&nbsp; While Loops · Break · Continue · Git · Functions</div>
+
+<h2>Part 19 — While Loops Complete</h2>
+
+<h3>Basic While Loop</h3>
+<p>Runs as long as a condition is True. Use when you don't know how many times to repeat.</p>
+<table>
+  <tr><th>Part</th><th>What it does</th><th>Why it matters</th></tr>
+  <tr><td>count = 0</td><td>Initialize variable before loop</td><td>Must exist before while checks it — else NameError</td></tr>
+  <tr><td>while count &lt; 5</td><td>Check condition each iteration</td><td>If True — run block. If False — stop.</td></tr>
+  <tr><td>count += 1</td><td>Update variable each loop</td><td>CRITICAL — without this loop runs forever</td></tr>
+</table>
+
+<div class="danger"><strong>Infinite loop:</strong> Forgetting to update the variable means condition never becomes False. Python loops forever. Press Ctrl+C to escape.</div>
+
+<h3>while True Pattern</h3>
+<p>Runs forever until a break statement exits it. Used when number of iterations is unknown.</p>
+<table>
+  <tr><th>Code</th><th>What it does</th></tr>
+  <tr><td>while True:</td><td>Loop runs forever — only exits via break</td></tr>
+  <tr><td>attempts += 1</td><td>Count each iteration</td></tr>
+  <tr><td>if correct: break</td><td>Exit when condition met</td></tr>
+  <tr><td>if attempts >= 3: break</td><td>Safety exit — prevents infinite loop</td></tr>
+</table>
+
+<div class="green"><strong>Real world:</strong> Every login system — keep asking for password until correct OR max attempts reached. Banks allow 3 PIN attempts then block card.</div>
+
+<h3>Password Loop Example</h3>
+<table>
+  <tr><th>Code</th><th>What it does</th></tr>
+  <tr><td>password = ""</td><td>Initialize before loop — empty string so condition starts True</td></tr>
+  <tr><td>while password != "secure123"</td><td>Keep looping while password is wrong</td></tr>
+  <tr><td>password = input(...)</td><td>Ask user each loop — overwrites previous value</td></tr>
+  <tr><td>print("Access granted")</td><td>Outside loop — only runs when loop ends — when password correct</td></tr>
+</table>
+
+<h3>For vs While</h3>
+<table>
+  <tr><th>Loop</th><th>Use when</th><th>Example</th></tr>
+  <tr><td>for</td><td>Fixed count or sequence known</td><td>Scan 65535 ports · loop through list</td></tr>
+  <tr><td>while</td><td>Condition based — unknown iterations</td><td>Keep asking until correct · wait for connection</td></tr>
+</table>
+
+<h2>Part 20 — Break and Continue</h2>
+
+<h3>break</h3>
+<table>
+  <tr><th>What it does</th><th>Loop after?</th><th>Use case</th></tr>
+  <tr><td>Exit loop entirely — immediately</td><td>No — stops completely</td><td>Found answer · max attempts · condition met</td></tr>
+</table>
+
+<h3>continue</h3>
+<table>
+  <tr><th>What it does</th><th>Loop after?</th><th>Use case</th></tr>
+  <tr><td>Skip current item — jump to next</td><td>Yes — continues with next</td><td>Skip invalid ports · skip empty log lines</td></tr>
+</table>
+
+<h3>break vs continue — One Line Summary</h3>
+<table>
+  <tr><th>Keyword</th><th>One line</th></tr>
+  <tr><td>break</td><td>Exit the loop entirely — done</td></tr>
+  <tr><td>continue</td><td>Skip this one item — keep going</td></tr>
+</table>
+
+<div class="note"><strong>Security example:</strong> Port scanner uses continue to skip invalid ports (0, 65536) and keeps scanning valid ones (1-65535).</div>
+
+<h2>Part 21 — Programs Built</h2>
+
+<h3>Login Attempt Limiter</h3>
+<table>
+  <tr><th>Feature</th><th>Code concept</th></tr>
+  <tr><td>3 attempts maximum</td><td>while True + attempts counter + break at 3</td></tr>
+  <tr><td>Access granted on correct</td><td>if password == correct: break</td></tr>
+  <tr><td>Account locked after 3 fails</td><td>if attempts >= 3: print locked + break</td></tr>
+</table>
+
+<h3>Number Guessing Game</h3>
+<table>
+  <tr><th>Feature</th><th>Code concept</th></tr>
+  <tr><td>Secret number</td><td>secret = 7</td></tr>
+  <tr><td>3 attempts</td><td>while attempts &lt; 3</td></tr>
+  <tr><td>Correct guess</td><td>if guess == secret: print + break</td></tr>
+  <tr><td>Game over</td><td>else after attempts used up</td></tr>
+</table>
+
+<h3>ATM PIN Checker — Written Independently</h3>
+<p>You wrote the complete logic yourself — only needed minor syntax help. Full logic was correct.</p>
+<table>
+  <tr><th>Feature</th><th>Code</th></tr>
+  <tr><td>3 attempts like real ATM</td><td>while attempts &lt; 3</td></tr>
+  <tr><td>Remaining attempts shown</td><td>f"{3 - attempts} attempts remaining"</td></tr>
+  <tr><td>Card blocked after 3 fails</td><td>else: print("Card blocked")</td></tr>
+</table>
+
+<h2>Part 22 — Git and GitHub</h2>
+
+<h3>Daily Git Workflow — Memorize This</h3>
+<table>
+  <tr><th>Step</th><th>Command</th><th>What it does</th></tr>
+  <tr><td>1</td><td>cd ~/cybersecurity/python</td><td>Navigate to your project folder</td></tr>
+  <tr><td>2</td><td>git add .</td><td>Stage ALL changed files</td></tr>
+  <tr><td>3</td><td>git commit -m "what you built"</td><td>Save snapshot with description</td></tr>
+  <tr><td>4</td><td>git push</td><td>Send to GitHub — makes it public</td></tr>
+</table>
+
+<div class="tip"><strong>git add . vs git add filename:</strong> git add . stages everything. git add filename.py stages one specific file. Use git add . for daily commits.</div>
+<div class="note"><strong>Commit message rule:</strong> Describe what you built — "Add login authentication system" not "edited week1.py".</div>
+<div class="danger"><strong>File organization:</strong> Use separate files for each concept — week1.py, practice.py, functions.py. Never delete old code — create new files instead. Old code stays on GitHub even if you delete locally.</div>
+
+<h3>Repository Setup — One Time</h3>
+<table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td>git init</td><td>Initialize Git in folder</td></tr>
+  <tr><td>git remote add origin URL</td><td>Connect to GitHub repo</td></tr>
+  <tr><td>git branch -M main</td><td>Set main branch</td></tr>
+  <tr><td>git push -u origin main</td><td>First push — sets upstream</td></tr>
+</table>
+
+<h2>Part 23 — Functions</h2>
+
+<h3>What is a Function</h3>
+<p>A reusable block of code. Define once — use many times. Avoids repeating the same code.</p>
+
+<h3>Function Anatomy</h3>
+<table>
+  <tr><th>Part</th><th>What it is</th><th>Example</th></tr>
+  <tr><td>def</td><td>Keyword — starts function definition</td><td>def greet</td></tr>
+  <tr><td>function_name</td><td>You choose — descriptive, lowercase, underscores</td><td>greet, check_password, scan_port</td></tr>
+  <tr><td>(parameter)</td><td>Input function receives — like a variable</td><td>(name), (port), (password)</td></tr>
+  <tr><td>: indented block</td><td>What the function does — must be indented 4 spaces</td><td>print, calculate, return</td></tr>
+</table>
+
+<h3>print vs return</h3>
+<table>
+  <tr><th>What</th><th>print inside function</th><th>return</th></tr>
+  <tr><td>Shows result</td><td>Yes — on screen</td><td>No — sends back to caller</td></tr>
+  <tr><td>Can reuse result</td><td>No — gone after display</td><td>Yes — store in variable</td></tr>
+  <tr><td>Analogy</td><td>Saying answer out loud — heard once, gone</td><td>Writing answer on paper — keep and use later</td></tr>
+</table>
+
+<h3>Early Return Pattern</h3>
+<p>Return exits function immediately. No need for else when return is used.</p>
+<table>
+  <tr><th>With else</th><th>With early return — cleaner</th></tr>
+  <tr><td>if x: return "A" else: return "B"</td><td>if x: return "A" · return "B"</td></tr>
+</table>
+
+<h3>Function Call Order</h3>
+<table>
+  <tr><th>Step</th><th>What</th><th>Why</th></tr>
+  <tr><td>1</td><td>Define function with def</td><td>Teach Python what the function does</td></tr>
+  <tr><td>2</td><td>Collect input if needed</td><td>Get data from user</td></tr>
+  <tr><td>3</td><td>Call function with that data</td><td>Execute the function</td></tr>
+</table>
+
+<div class="danger"><strong>Must define before calling.</strong> If you call a function before defining it — Python says NameError — it doesn't know what it is yet.</div>
+
+<h3>Functions Built This Session</h3>
+<table>
+  <tr><th>Function</th><th>What it does</th><th>Concepts used</th></tr>
+  <tr><td>greet(name)</td><td>Prints greeting with name</td><td>parameter, f-string</td></tr>
+  <tr><td>add(a, b)</td><td>Returns sum of two numbers</td><td>multiple parameters, return</td></tr>
+  <tr><td>check_port(port)</td><td>Returns Valid or Invalid for port number</td><td>parameter, comparison, early return</td></tr>
+  <tr><td>check_password_strength(password)</td><td>Returns Too short, Weak, or Strong</td><td>len(), if/elif/else, return</td></tr>
+  <tr><td>check_username(username)</td><td>Returns Too short, Too long, or Valid</td><td>len(), multiple conditions, return</td></tr>
+</table>
+
+<div class="green"><strong>Key insight:</strong> You wrote check_username completely independently — correct logic, correct structure. That is understanding, not copying.</div>
+
+<h3>File Organization — Important</h3>
+<table>
+  <tr><th>File</th><th>What goes in it</th></tr>
+  <tr><td>week1.py</td><td>Login system · main projects</td></tr>
+  <tr><td>practice.py</td><td>Exercises · experiments</td></tr>
+  <tr><td>functions.py</td><td>All function examples</td></tr>
+</table>
+
+<div class="footer">
+  <span>Aniswar Rath · Part 3 Notes · April 2026 · While Loops + Break/Continue + Git + Functions</span>
+  <span>Next: Multiple parameters · default parameters · lists · dictionaries</span>
+</div>
+
+</body>
+</html>
