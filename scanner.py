@@ -29,3 +29,5 @@ for ip in targets :
     open_ports = scan_ports (ip, common_ports)
     targets[ip]["ports"] = open_ports
 display_results(targets)
+
+
