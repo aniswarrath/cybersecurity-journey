@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 40px; font-size: 13px; max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 6px; }
+  h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; background: #1a1a1a; padding: 6px 10px; margin: 0 0 10px 0; }
+  h3 { font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 16px 0 6px 0; border-left: 3px solid #1a1a1a; padding-left: 8px; }
+  p { font-size: 13px; line-height: 1.7; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th { background: #f5f5f5; padding: 6px 10px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; }
+  td { padding: 5px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  td:first-child { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
+  pre { background: #f5f5f5; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 12px; margin-bottom: 12px; overflow-x: auto; border-left: 3px solid #1a1a1a; }
+  .note { background: #fffbe6; border-left: 3px solid #f0c000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .danger { background: #fff0f0; border-left: 3px solid #cc0000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .green { background: #f0fff4; border-left: 3px solid #00aa44; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .qa { background: #f8f8f8; border-left: 3px solid #7F77DD; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .subtitle { color: #666; font-size: 12px; margin-bottom: 20px; }
+  .section { page-break-before: always; padding-top: 20px; }
+  .section-first { padding-top: 0; }
+  .footer { margin-top: 40px; padding-top: 15px; border-top: 2px solid #1a1a1a; font-size: 11px; color: #666; display: flex; justify-content: space-between; }
+  @media print {
+    .section { page-break-before: always; }
+    h2 { page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    .note, .danger, .green, .qa { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="section-first">
+<h1>Python Notes — Error Handling · File I/O · Modules · Sockets</h1>
+<div class="subtitle">Aniswar Rath &nbsp;|&nbsp; May 2026 &nbsp;|&nbsp; try/except · finally · raise · File modes · with/as · import · datetime · os · socket</div>
+</div>
+
+<!-- ERROR HANDLING -->
+<div class="section">
+<h2>Error Handling — try · except · finally · raise</h2>
+
+<h3>Why Error Handling Exists</h3>
+<p>When your program runs — things can go wrong. User types text instead of a number. File doesn't exist. Division by zero. Without error handling — Python crashes and shows an ugly error message. With error handling — you catch the problem and respond gracefully. The program continues running instead of crashing.</p>
+
+<div class="qa"><strong>Q: If if/elif/else is sufficient — why does try/except exist?</strong><br>
+A: if/elif/else checks conditions BEFORE code runs — things you anticipate. try/except catches crashes DURING code running — things you cannot predict in advance. You cannot write an if statement to handle every possible wrong input a user might type. try/except handles anything that goes wrong at runtime — no matter what it is.</div>
+
+<h3>The Complete Structure</h3>
+<pre>
+try:
+    # code that might fail goes here
+except ValueError:
+    # runs if ValueError occurs
+except ZeroDivisionError:
+    # runs if ZeroDivisionError occurs
+except Exception as e:
+    # catches ANY other error — e tells you what went wrong
+    print(f"Unexpected error: {e}")
+else:
+    # runs ONLY if NO error occurred — no exception was raised
+finally:
+    # runs ALWAYS — error or no error — used for cleanup
+</pre>
+
+<h3>When to Use try/except</h3>
+<table>
+  <tr><th>Situation</th><th>Need try/except?</th><th>Why</th></tr>
+  <tr><td>User enters number you convert with int()</td><td>Yes</td><td>They might type text — ValueError</td></tr>
+  <tr><td>Dividing by a variable</td><td>Yes</td><td>Variable might be zero — ZeroDivisionError</td></tr>
+  <tr><td>Opening a file</td><td>Yes</td><td>File might not exist — FileNotFoundError</td></tr>
+  <tr><td>Network connection</td><td>Yes</td><td>Server might be down — ConnectionError</td></tr>
+  <tr><td>Printing a string</td><td>No</td><td>Cannot fail</td></tr>
+  <tr><td>Simple addition of known numbers</td><td>No</td><td>Cannot fail</td></tr>
+</table>
+
+<h3>All Common Error Types</h3>
+<table>
+  <tr><th>Error</th><th>When it happens</th><th>Example</th></tr>
+  <tr><td>ValueError</td><td>Wrong type conversion</td><td>int("hello") — cannot convert text to number</td></tr>
+  <tr><td>ZeroDivisionError</td><td>Dividing by zero</td><td>100 / 0</td></tr>
+  <tr><td>FileNotFoundError</td><td>File does not exist</td><td>open("missing.txt", "r")</td></tr>
+  <tr><td>KeyError</td><td>Dictionary key missing</td><td>dict["nonexistent_key"]</td></tr>
+  <tr><td>IndexError</td><td>List index out of range</td><td>list[999] when list has 3 items</td></tr>
+  <tr><td>TypeError</td><td>Wrong type for operation</td><td>"hello" + 5 — can't add string and int</td></tr>
+  <tr><td>ConnectionError</td><td>Network connection failed</td><td>Connecting to unreachable server</td></tr>
+  <tr><td>TimeoutError</td><td>Connection timed out</td><td>Server too slow to respond</td></tr>
+  <tr><td>Exception</td><td>Catches everything — use as last resort</td><td>except Exception as e: print(e)</td></tr>
+</table>
+
+<h3>try/except — Complete Example</h3>
+<pre>
+try:
+    number = int(input("Enter a number: "))   # ValueError if text entered
+    result = 100 / number                      # ZeroDivisionError if zero
+    print(f"100 / {number} = {result}")
+except ValueError:
+    print("Error — please enter a number not text")
+except ZeroDivisionError:
+    print("Error — cannot divide by zero")
+except Exception as e:
+    print(f"Unexpected error: {e}")
+else:
+    print("Calculation successful — no errors")
+finally:
+    print("Program finished — this always runs")
+</pre>
+
+<table>
+  <tr><th>Input</th><th>What runs</th><th>Output</th></tr>
+  <tr><td>5</td><td>try + else + finally</td><td>Result: 20.0 → Calculation successful → Program finished</td></tr>
+  <tr><td>hello</td><td>try crashes + except ValueError + finally</td><td>Error — please enter a number → Program finished</td></tr>
+  <tr><td>0</td><td>try crashes + except ZeroDivisionError + finally</td><td>Error — cannot divide by zero → Program finished</td></tr>
+  <tr><td>#</td><td>try crashes + except ValueError + finally</td><td># is a string — int("#") fails — ValueError</td></tr>
+</table>
+
+<h3>finally — What It Is and When to Use It</h3>
+<p>finally runs NO MATTER WHAT — whether an error occurred, whether the error was caught, whether the code succeeded. It always executes. Most important use — cleanup — closing files, closing sockets, releasing resources.</p>
+
+<pre>
+# Without finally — socket might stay open if error occurs
+sock = socket.socket()
+try:
+    result = sock.connect_ex((ip, port))
+except Exception as e:
+    print(f"Error: {e}")
+    # if we crash here — sock.close() never called — resource leak
+sock.close()
+
+# With finally — socket ALWAYS closes no matter what
+sock = socket.socket()
+try:
+    result = sock.connect_ex((ip, port))
+except Exception as e:
+    print(f"Error: {e}")
+finally:
+    sock.close()  # always runs — always closes — no resource leak
+</pre>
+
+<h3>else in try/except</h3>
+<p>else runs ONLY if no exception was raised in the try block. Different from finally — finally always runs, else only runs on success.</p>
+
+<pre>
+try:
+    number = int(input("Enter number: "))
+except ValueError:
+    print("Not a number")
+else:
+    print("Valid number entered")   # only runs if no ValueError
+finally:
+    print("Always runs")            # runs regardless
+</pre>
+
+<h3>raise — Manually Trigger an Error</h3>
+<p>raise lets you trigger an error yourself — useful when you want to treat a business rule violation like an error.</p>
+
+<pre>
+def check_username(username):
+    if username[0].isdigit():
+        raise ValueError("Username cannot start with a number")
+    if len(username) < 3:
+        raise ValueError("Username too short — minimum 3 characters")
+    return True
+
+try:
+    check_username("123anish")
+except ValueError as e:
+    print(f"Invalid username: {e}")
+</pre>
+
+<div class="qa"><strong>Q: How do developers know what errors to handle?</strong><br>
+A: Real workflow — Write code without try/except first — happy path only. Run it and break it intentionally — type wrong inputs, use bad files. Python shows the error name — ZeroDivisionError: division by zero. Copy that error name into your except clause. Repeat until all cases handled. Nobody memorizes everything — Python tells you what went wrong.</div>
+</div>
+
+<!-- FILE I/O -->
+<div class="section">
+<h2>File I/O — Reading and Writing Files</h2>
+
+<h3>What File I/O Is</h3>
+<p>File I/O — Input/Output — lets your program read from and write to files on your computer. Like saving scan results to a text file or reading a list of IPs to scan. Same concept as Linux terminal commands — just Python syntax.</p>
+
+<table>
+  <tr><th>Linux command</th><th>Python equivalent</th></tr>
+  <tr><td>echo "hello" > file.txt</td><td>open("file.txt", "w") then f.write("hello")</td></tr>
+  <tr><td>cat file.txt</td><td>open("file.txt", "r") then f.read()</td></tr>
+  <tr><td>echo "hello" >> file.txt</td><td>open("file.txt", "a") then f.write("hello")</td></tr>
+</table>
+
+<h3>File Opening Modes</h3>
+<table>
+  <tr><th>Mode</th><th>What it does</th><th>File must exist?</th><th>Overwrites?</th></tr>
+  <tr><td>"r"</td><td>Read only — cannot write</td><td>Yes — FileNotFoundError if missing</td><td>No</td></tr>
+  <tr><td>"w"</td><td>Write — creates new file or overwrites existing</td><td>No — creates if missing</td><td>Yes — wipes everything first</td></tr>
+  <tr><td>"a"</td><td>Append — adds to end of file</td><td>No — creates if missing</td><td>No — preserves existing content</td></tr>
+  <tr><td>"r+"</td><td>Read AND write — both operations</td><td>Yes — must already exist</td><td>No — preserves existing content</td></tr>
+</table>
+
+<h3>with open() as f — Context Manager</h3>
+<p>The with statement is the correct way to open files. It automatically closes the file when the with block ends — even if an error occurs. You never need to call f.close() manually.</p>
+
+<pre>
+# Without with — must close manually — easy to forget
+f = open("log.txt", "w")
+f.write("Aniswar Rath\n")
+f.close()   # if error happens before this — file never closes
+
+# With with — closes automatically — always safe
+with open("log.txt", "w") as f:
+    f.write("Aniswar Rath\n")
+# file automatically closed here — even if error occurred inside
+</pre>
+
+<h3>Writing to a File — "w" mode</h3>
+<pre>
+with open("log.txt", "w") as f:
+    f.write("Aniswar Rath\n")    # \n = newline — starts new line
+    f.write("May 14, 2026\n")
+</pre>
+
+<div class="note"><strong>"\n" — newline character:</strong> Without \n — everything writes on one line. With \n — each write starts on a new line. Like pressing Enter on your keyboard.</div>
+
+<h3>Reading from a File — "r" mode</h3>
+<pre>
+with open("log.txt", "r") as f:
+    content = f.read()    # reads entire file as one string
+    print(content)        # must print to see it
+
+# Store in variable — use outside the with block
+with open("log.txt", "r") as f:
+    content = f.read()
+
+print(content)        # still works — file closed but content saved in variable
+print(len(content))   # can use content anywhere after reading
+</pre>
+
+<div class="qa"><strong>Q: Why store in content = f.read() instead of just print(f.read())?</strong><br>
+A: You CAN print directly — print(f.read()) works. But storing in content lets you use the data multiple times and outside the with block. Once with block ends — file is closed. content variable still holds the data — you can print it, modify it, search it, write it elsewhere. Direct print — data is gone after printing.</div>
+
+<h3>Appending to a File — "a" mode</h3>
+<pre>
+# First write — creates file
+with open("log.txt", "w") as f:
+    f.write("Aniswar Rath\n")
+    f.write("May 14, 2026\n")
+
+# Append — adds to end — does not overwrite
+with open("log.txt", "a") as f:
+    f.write("Day 65 of 400\n")
+
+# Read back — shows all three lines
+with open("log.txt", "r") as f:
+    content = f.read()
+    print(content)
+
+# Output:
+# Aniswar Rath
+# May 14, 2026
+# Day 65 of 400
+</pre>
+
+<h3>Read and Write — "r+" mode</h3>
+<p>r+ opens file for both reading and writing. File must already exist. Important: reading moves the cursor to the end — writing then happens at the end — use f.seek(0) to rewind cursor to beginning before reading again.</p>
+
+<pre>
+with open("log.txt", "r+") as f:
+    content = f.read()        # read existing content — cursor moves to END
+    f.write("\nNew line")     # write at cursor position — end of file
+    f.seek(0)                 # rewind cursor to BEGINNING of file
+    updated = f.read()        # read everything including new line
+    print(updated)            # shows all content including new line
+</pre>
+
+<h3>f.seek() — Moving the File Cursor</h3>
+<p>Think of a file like a cassette tape. Reading and writing moves a playhead along the tape. f.seek() moves the playhead to any position.</p>
+
+<table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td>f.seek(0)</td><td>Move cursor to beginning of file — position 0</td></tr>
+  <tr><td>f.seek(10)</td><td>Move cursor to position 10 — 10th byte</td></tr>
+  <tr><td>f.tell()</td><td>Returns current cursor position</td></tr>
+</table>
+
+<h3>All File Reading Methods</h3>
+<table>
+  <tr><th>Method</th><th>What it returns</th><th>When to use</th></tr>
+  <tr><td>f.read()</td><td>Entire file as one string</td><td>Small files — read everything at once</td></tr>
+  <tr><td>f.readline()</td><td>One line at a time</td><td>Process file line by line</td></tr>
+  <tr><td>f.readlines()</td><td>List of all lines</td><td>When you need to access specific lines by index</td></tr>
+</table>
+
+<pre>
+# readline — one line at a time
+with open("log.txt", "r") as f:
+    line1 = f.readline()    # reads first line
+    line2 = f.readline()    # reads second line
+    print(line1)
+    print(line2)
+
+# readlines — all lines as list
+with open("log.txt", "r") as f:
+    lines = f.readlines()   # ["Aniswar Rath\n", "May 14, 2026\n", ...]
+    print(lines[0])         # first line
+    print(lines[1])         # second line
+</pre>
+
+<h3>Writing Numbers to Files</h3>
+<p>f.write() only accepts strings. Numbers must be converted first with str().</p>
+
+<pre>
+port = 22
+with open("results.txt", "w") as f:
+    f.write(str(port) + "\n")    # convert int to string first
+    f.write(f"Port {port}\n")    # or use f-string — automatic conversion
+</pre>
+
+<h3>Error Handling with Files</h3>
+<pre>
+try:
+    with open("log.txt", "r") as f:
+        content = f.read()
+        print(content)
+except FileNotFoundError:
+    print("Error — file not found")
+except PermissionError:
+    print("Error — no permission to read file")
+finally:
+    print("File operation complete — always runs")
+</pre>
+
+<h3>Security Use Case — Save Port Scanner Results</h3>
+<pre>
+open_ports = [22, 80, 443]
+target = "192.168.1.1"
+
+with open("scan_results.txt", "w") as f:
+    f.write(f"Scan results for {target}\n")
+    f.write("="*30 + "\n")
+    for port in open_ports:
+        f.write(f"Port {port} — OPEN\n")
+
+print("Results saved to scan_results.txt")
+</pre>
+</div>
+
+<!-- MODULES -->
+<div class="section">
+<h2>Modules — import · datetime · os · random · time</h2>
+
+<h3>What a Module Is</h3>
+<p>A module is a file containing pre-written Python code — functions, tools, variables — that you import and use in your own program. Instead of writing everything from scratch — you import what you need. Python comes with hundreds of built-in modules. You can also install third-party modules using pip.</p>
+
+<h3>Three Ways to Import</h3>
+<pre>
+import datetime                      # import entire module
+from datetime import date            # import specific item only
+import datetime as dt                # import with short alias — dt.date.today()
+</pre>
+
+<h3>datetime Module — Date and Time</h3>
+<pre>
+import datetime
+
+# Today's date
+today = datetime.date.today()
+print(today)                                    # 2026-05-14
+
+# Current date and time
+now = datetime.datetime.now()
+print(now)                                      # 2026-05-14 11:02:59.123456
+
+# Formatted date using strftime
+print(today.strftime('%B %d, %Y'))              # May 14, 2026
+print(now.strftime('%H:%M:%S'))                 # 11:02:59
+print(now.strftime('%d/%m/%Y %H:%M'))           # 14/05/2026 11:02
+</pre>
+
+<h3>strftime Format Codes — Memorize These</h3>
+<table>
+  <tr><th>Code</th><th>Meaning</th><th>Example</th></tr>
+  <tr><td>%B</td><td>Full month name</td><td>May</td></tr>
+  <tr><td>%b</td><td>Short month name</td><td>May</td></tr>
+  <tr><td>%d</td><td>Day with leading zero</td><td>14</td></tr>
+  <tr><td>%Y</td><td>4 digit year</td><td>2026</td></tr>
+  <tr><td>%y</td><td>2 digit year</td><td>26</td></tr>
+  <tr><td>%H</td><td>Hour — 24hr format</td><td>11</td></tr>
+  <tr><td>%M</td><td>Minute</td><td>02</td></tr>
+  <tr><td>%S</td><td>Second</td><td>59</td></tr>
+</table>
+
+<div class="note"><strong>Don't memorize all format codes.</strong> Memorize the common ones above. Look up the rest when needed. Every professional does this.</div>
+
+<h3>os Module — Operating System</h3>
+<pre>
+import os
+
+# Check if file exists — essential before opening
+print(os.path.exists("log.txt"))          # True or False
+
+# Get current working directory — where your script is running from
+print(os.getcwd())                         # /Users/apple/cybersecurity/python
+
+# List files in directory
+print(os.listdir("."))                     # ['fileio.py', 'log.txt', ...]
+
+# Create a directory
+os.makedirs("results", exist_ok=True)     # creates results folder — no error if exists
+
+# Join paths safely — works on any OS
+path = os.path.join("results", "scan.txt")  # results/scan.txt
+</pre>
+
+<h3>random Module — Random Numbers</h3>
+<pre>
+import random
+
+# Random integer between 1 and 65535
+port = random.randint(1, 65535)
+print(f"Random port: {port}")
+
+# Random choice from a list
+protocols = ["TCP", "UDP", "ICMP"]
+print(random.choice(protocols))
+
+# Shuffle a list
+ports = [22, 80, 443, 8080]
+random.shuffle(ports)
+print(ports)
+</pre>
+
+<h3>time Module — Pausing and Timing</h3>
+<pre>
+import time
+
+# Pause program for 1 second — useful in port scanner between requests
+time.sleep(1)
+
+# Measure how long something takes
+start = time.time()
+# ... code to measure ...
+end = time.time()
+print(f"Took {end - start:.2f} seconds")
+</pre>
+
+<h3>Security Use — datetime in Port Scanner</h3>
+<pre>
+import datetime
+
+def scan_target(ip):
+    start_time = datetime.datetime.now()
+    print(f"Scan started: {start_time.strftime('%H:%M:%S')}")
+
+    # ... scanning code ...
+
+    end_time = datetime.datetime.now()
+    duration = end_time - start_time
+    print(f"Scan completed in {duration.seconds} seconds")
+</pre>
+</div>
+
+<!-- SOCKETS -->
+<div class="section">
+<h2>Sockets — Python Network Programming</h2>
+
+<h3>What a Socket Is</h3>
+<p>A socket is an endpoint for sending and receiving data over a network. Every network connection ever made — HTTP, SSH, FTP, SMTP — uses sockets underneath. When your browser visits google.com — it creates a socket, connects to Google's IP on port 443, sends an HTTP request, receives the response, closes the socket. A socket is the fundamental building block of all network communication.</p>
+
+<div class="qa"><strong>Q: What is a socket in simple terms?</strong><br>
+A: Think of it like a telephone. You need a phone on each end to have a conversation. Socket = the phone. IP address = phone number. Port = extension number. connect_ex() = dialing. send/recv = talking. close() = hanging up. Both sides need a socket — your program creates one, the server already has one listening.</div>
+
+<h3>Socket Analogy</h3>
+<table>
+  <tr><th>Phone call</th><th>Socket equivalent</th><th>Python code</th></tr>
+  <tr><td>Pick up handset</td><td>Create socket</td><td>socket.socket(AF_INET, SOCK_STREAM)</td></tr>
+  <tr><td>Dial phone number</td><td>IP address</td><td>"192.168.1.1"</td></tr>
+  <tr><td>Dial extension</td><td>Port number</td><td>80</td></tr>
+  <tr><td>Set time to wait</td><td>Timeout</td><td>sock.settimeout(1)</td></tr>
+  <tr><td>Call connects</td><td>Connection established</td><td>sock.connect_ex((ip, port)) returns 0</td></tr>
+  <tr><td>Nobody answers</td><td>Port closed or filtered</td><td>connect_ex returns non-zero</td></tr>
+  <tr><td>Hang up</td><td>Close socket</td><td>sock.close()</td></tr>
+</table>
+
+<h3>Creating a Socket</h3>
+<pre>
+import socket
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+</pre>
+
+<table>
+  <tr><th>Parameter</th><th>What it means</th><th>Alternative</th></tr>
+  <tr><td>socket.AF_INET</td><td>Use IPv4 addresses</td><td>AF_INET6 for IPv6</td></tr>
+  <tr><td>socket.SOCK_STREAM</td><td>Use TCP — reliable ordered delivery</td><td>SOCK_DGRAM for UDP</td></tr>
+</table>
+
+<h3>connect vs connect_ex — Critical Difference</h3>
+<table>
+  <tr><th>Method</th><th>On failure</th><th>Use in port scanner</th></tr>
+  <tr><td>sock.connect((ip, port))</td><td>Raises exception — program crashes</td><td>No — crashes on first closed port</td></tr>
+  <tr><td>sock.connect_ex((ip, port))</td><td>Returns error code — program continues</td><td>Yes — handles closed ports gracefully</td></tr>
+</table>
+
+<pre>
+result = sock.connect_ex(("192.168.1.1", 80))
+# result == 0    → port OPEN — connection succeeded — SYN-ACK received
+# result != 0   → port CLOSED or FILTERED — connection failed
+</pre>
+
+<h3>settimeout — Why It Is Critical</h3>
+<p>Without timeout — scanner waits forever on filtered ports — ports where firewall silently drops packets. A scan of 1000 ports could take hours. With 1 second timeout — maximum 1000 seconds worst case. In practice much faster — most ports respond in milliseconds.</p>
+
+<pre>
+sock.settimeout(1)    # wait maximum 1 second — then give up and move on
+</pre>
+
+<h3>check_port Function — Complete with Explanation</h3>
+<pre>
+import socket
+
+def check_port(ip, port):
+    try:
+        # Step 1 — create TCP/IPv4 socket — pick up the phone
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Step 2 — set timeout — don't wait more than 1 second
+        sock.settimeout(1)
+
+        # Step 3 — try to connect — dial the number
+        result = sock.connect_ex((ip, port))
+
+        # Step 4 — close socket — hang up
+        sock.close()
+
+        # Step 5 — return result
+        # result == 0 means connection succeeded — port OPEN
+        # result != 0 means connection failed — port CLOSED or FILTERED
+        return result == 0
+
+    except Exception as e:
+        return False   # any unexpected error — treat as closed
+</pre>
+
+<h3>What connect_ex Does Under the Hood</h3>
+<p>When you call connect_ex() — Python automatically performs the full TCP three-way handshake — SYN, SYN-ACK, ACK — that you already understand from networking theory. If the handshake completes — result = 0 — port is open. If server sends RST — Reset — port closed — non-zero result. If no response within timeout — filtered port — timeout error.</p>
+
+<table>
+  <tr><th>Server response</th><th>Port status</th><th>connect_ex result</th></tr>
+  <tr><td>SYN-ACK received</td><td>OPEN — service running</td><td>0</td></tr>
+  <tr><td>RST — Reset received</td><td>CLOSED — no service</td><td>Non-zero</td></tr>
+  <tr><td>No response — timeout</td><td>FILTERED — firewall blocking</td><td>Non-zero — timed out</td></tr>
+</table>
+
+<h3>DNS Lookup with Socket</h3>
+<pre>
+import socket
+
+# Resolve domain name to IP address
+ip = socket.gethostbyname("google.com")
+print(f"google.com → {ip}")    # google.com → 142.251.222.142
+
+# Use in port scanner — accept domain name or IP
+target = input("Enter target (domain or IP): ")
+try:
+    ip = socket.gethostbyname(target)
+    print(f"Target IP: {ip}")
+except socket.gaierror:
+    print("Could not resolve hostname")
+</pre>
+
+<h3>Why Library Network Blocked Socket Connections</h3>
+<p>When testing at the library — all ports returned False including Google's port 80 and 443. This is called egress filtering — the library's firewall blocks outgoing connections to certain ports. This is a legitimate security control used in organizations to prevent data exfiltration and control internet access. Your code was correct — the network was the variable. At home — ports 80 and 443 on Google return True.</p>
+
+<div class="green"><strong>Real security lesson:</strong> Finding that an organization blocks outgoing connections on certain ports is a valid penetration test finding. It tells you about their security posture — what they allow and what they restrict. Always test on your home network when library network blocks results.</div>
+
+<h3>Complete Port Scanner — Build Target</h3>
+<pre>
+import socket
+from datetime import datetime
+
+def check_port(ip, port):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1)
+        result = sock.connect_ex((ip, port))
+        sock.close()
+        return result == 0
+    except:
+        return False
+
+def scan_target(ip, ports):
+    print(f"\n{'='*40}")
+    print(f"Target: {ip}")
+    print(f"Scan started: {datetime.now().strftime('%H:%M:%S')}")
+    print(f"{'='*40}")
+
+    open_ports = []
+
+    for port in ports:
+        if check_port(ip, port):
+            print(f"Port {port} — OPEN")
+            open_ports.append(port)
+        else:
+            print(f"Port {port} — closed")
+
+    print(f"\nScan complete — {len(open_ports)} open ports found")
+    return open_ports
+
+# Common ports to scan
+common_ports = [21, 22, 23, 25, 53, 80, 443, 3306, 8080, 8443]
+
+# Get target from user
+target = input("Enter target IP or domain: ")
+
+try:
+    ip = socket.gethostbyname(target)
+except socket.gaierror:
+    print("Could not resolve target")
+    exit()
+
+# Run scan
+open_ports = scan_target(ip, common_ports)
+
+# Save results to file
+with open("scan_results.txt", "w") as f:
+    f.write(f"Scan results for {target} ({ip})\n")
+    f.write(f"{'='*40}\n")
+    for port in open_ports:
+        f.write(f"Port {port} — OPEN\n")
+    f.write(f"\nTotal: {len(open_ports)} open ports\n")
+
+print("Results saved to scan_results.txt")
+</pre>
+
+<div class="footer">
+  <span>Aniswar Rath · Python Notes — Error Handling · File I/O · Modules · Sockets · May 2026</span>
+  <span>Next: Build complete port scanner · Packet sniffer · OOP · Security+ study</span>
+</div>
+</div>
+
+</body>
+</html>

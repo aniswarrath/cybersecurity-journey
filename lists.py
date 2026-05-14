@@ -66,3 +66,4 @@ ports = [21,22,80,443,3306,8080,8443]
 suspicious = [21, 3306, 8080]
 flagged = [port for port in ports if port in suspicious]
 print (f"suspicious ports found : {flagged} ")
+

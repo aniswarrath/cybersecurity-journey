@@ -95,3 +95,4 @@ for device, details in network_devices.items():
     print(f"\nDevice:{device}")
     for key, value in details.items():
         print(f" {key} : {value}")
+

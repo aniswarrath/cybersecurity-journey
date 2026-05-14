@@ -1,0 +1,458 @@
+
+networking-notes-part12-onwards.html
+
+Page
+
+/
+1
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 40px; font-size: 13px; max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 6px; }
+  h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; background: #1a1a1a; padding: 6px 10px; margin: 0 0 10px 0; }
+  h3 { font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 16px 0 6px 0; border-left: 3px solid #1a1a1a; padding-left: 8px; }
+  p { font-size: 13px; line-height: 1.7; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th { background: #f5f5f5; padding: 6px 10px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; }
+  td { padding: 5px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  td:first-child { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
+  code { font-family: 'Courier New', monospace; background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  .note { background: #fffbe6; border-left: 3px solid #f0c000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .danger { background: #fff0f0; border-left: 3px solid #cc0000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .green { background: #f0fff4; border-left: 3px solid #00aa44; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .qa { background: #f8f8f8; border-left: 3px solid #7F77DD; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .subtitle { color: #666; font-size: 12px; margin-bottom: 20px; }
+  .section { page-break-before: always; padding-top: 20px; }
+  .section-first { padding-top: 0; }
+  .footer { margin-top: 40px; padding-top: 15px; border-top: 2px solid #1a1a1a; font-size: 11px; color: #666; display: flex; justify-content: space-between; }
+  @media print {
+    .section { page-break-before: always; }
+    h2 { page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+    .note, .danger, .green, .qa { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="section-first">
+<h1>Networking Notes — Part 12 Onwards</h1>
+<div class="subtitle">Aniswar Rath &nbsp;|&nbsp; May 2026 &nbsp;|&nbsp; SSH · FTP · SMTP · SSL vs TLS · Sockets · Packet Sniffing · WiFi Security · Zero Trust</div>
+</div>
+
+<!-- PART 12 — SSH -->
+<div class="section">
+<h2>Part 12 — SSH — Secure Shell</h2>
+
+<h3>What SSH Is</h3>
+<p>SSH — Secure Shell — is a cryptographic network protocol that provides secure encrypted remote terminal access to servers over an unsecured network. It replaced Telnet — the old unencrypted remote access protocol — where everything including passwords traveled as plain text. SSH encrypts everything end to end.</p>
+
+<table>
+  <tr><th>Feature</th><th>Telnet — old</th><th>SSH — modern</th></tr>
+  <tr><td>Encryption</td><td>None — plain text</td><td>Full encryption end to end</td></tr>
+  <tr><td>Password security</td><td>Visible on network</td><td>Encrypted — unreadable</td></tr>
+  <tr><td>Port</td><td>23</td><td>22</td></tr>
+  <tr><td>Status</td><td>Dead — never use</td><td>Standard — used everywhere</td></tr>
+</table>
+
+<div class="qa"><strong>Q: What is a cryptographic network protocol?</strong><br>
+A: Three words — Cryptographic = uses encryption and mathematical algorithms to secure data. Network = works over a computer network. Protocol = a set of rules two computers agree to follow when communicating. Together: a set of rules for two computers to communicate over a network where all communication is mathematically encrypted.</div>
+
+<div class="qa"><strong>Q: What is an unsecured network?</strong><br>
+A: Any network where traffic can be intercepted and read by others. The internet itself is unsecured — your data passes through dozens of routers, ISPs, and networks you don't control. Public WiFi at a cafe — anyone on same network can capture packets. SSH encrypts everything before it leaves your device — even if someone captures your packets — they see only gibberish.</div>
+
+<h3>SSH Authentication — Two Methods</h3>
+
+<h3>Method 1 — Password Authentication</h3>
+<p>You connect and type a password. Password travels encrypted to server. Server checks if correct. Access granted. Simple but vulnerable to brute force — attacker tries thousands of passwords automatically.</p>
+
+<h3>Method 2 — Key-Based Authentication — More Secure</h3>
+<p>You generate a mathematically linked key pair. Private key stays on your laptop — never sent anywhere — ever. Public key is placed on the server. When you connect — server sends a challenge — your private key solves it mathematically — server verifies with public key — access granted. No password ever sent — nothing to brute force.</p>
+
+<table>
+  <tr><th>Feature</th><th>Password Auth</th><th>Key-Based Auth</th></tr>
+  <tr><td>What is sent</td><td>Encrypted password</td><td>Mathematical proof — private key never sent</td></tr>
+  <tr><td>Brute force risk</td><td>Yes — attacker tries thousands of passwords</td><td>No — 2^256 possibilities — impossible</td></tr>
+  <tr><td>Phishing risk</td><td>Yes — trick you into typing on fake site</td><td>No — private key never typed or transmitted</td></tr>
+  <tr><td>Security level</td><td>Medium</td><td>Very high</td></tr>
+</table>
+
+<div class="qa"><strong>Q: What is a private key and why does it never need to leave your laptop?</strong><br>
+A: A private key is a very large mathematically generated secret number. When you connect to a server — the server sends a challenge — a puzzle only your private key can solve. You solve it and send the solution back. Server verifies using your public key. You proved you have the private key WITHOUT ever sending it. The private key never leaves your device because it never needs to — only the solution to the challenge is sent — and that solution is useless for future connections.</div>
+
+<h3>SSH Keys — What Gets Generated</h3>
+<table>
+  <tr><th>File</th><th>Location</th><th>What it is</th><th>Share?</th></tr>
+  <tr><td>id_ed25519</td><td>~/.ssh/id_ed25519</td><td>Private key — your mathematical secret</td><td>NEVER — not with anyone</td></tr>
+  <tr><td>id_ed25519.pub</td><td>~/.ssh/id_ed25519.pub</td><td>Public key — goes on servers you want to access</td><td>Yes — safe to share</td></tr>
+</table>
+
+<div class="note"><strong>ed25519</strong> is the encryption algorithm — modern elliptic curve cryptography. Faster and more secure than older RSA keys. The -t flag in ssh-keygen specifies the algorithm type.</div>
+
+<h3>Commands You Ran</h3>
+<table>
+  <tr><th>Command</th><th>What it did</th></tr>
+  <tr><td>ssh-keygen -t ed25519</td><td>Generated your private and public key pair</td></tr>
+  <tr><td>ssh-copy-id apple@127.0.0.1</td><td>Copied public key to your Mac's authorized_keys — enables key-based auth</td></tr>
+  <tr><td>ssh apple@127.0.0.1</td><td>Connected to your own Mac via SSH — worked without password after key setup</td></tr>
+  <tr><td>ssh-keygen -p -f ~/.ssh/id_ed25519</td><td>Added passphrase to private key — protects it even if stolen</td></tr>
+  <tr><td>whoami</td><td>Inside SSH session — confirmed logged in as apple</td></tr>
+  <tr><td>exit</td><td>Close SSH session</td></tr>
+</table>
+
+<h3>How Attackers Steal Private Keys — 5 Methods</h3>
+<table>
+  <tr><th>Method</th><th>How it works</th><th>Defense</th></tr>
+  <tr><td>Physical access</td><td>30 seconds with your unlocked laptop — runs cat ~/.ssh/id_ed25519 — copies entire key</td><td>Lock screen always — Cmd+Ctrl+Q on Mac</td></tr>
+  <tr><td>Malware</td><td>Fake software or email attachment installs malware — automatically finds and exfiltrates key silently</td><td>Never install software from untrusted sources</td></tr>
+  <tr><td>Compromised backup</td><td>Private key in home folder — if backed up to unencrypted cloud — attacker who hacks cloud account gets key</td><td>Exclude .ssh from cloud backups</td></tr>
+  <tr><td>Weak file permissions</td><td>If key file readable by other users on same system — any user can read it</td><td>chmod 600 ~/.ssh/id_ed25519 — only you can read</td></tr>
+  <tr><td>Supply chain attack</td><td>Malicious tool you install reads your SSH keys and sends them to attacker silently</td><td>Only install software from verified sources</td></tr>
+</table>
+
+<div class="qa"><strong>Q: If attacker gets private key file — do they need your Mac password to use it?</strong><br>
+A: No. Attacker copies the key file to their own laptop and uses it from there: chmod 600 stolen_key → ssh -i stolen_key apple@yourserver.com. They don't need your Mac at all. This is why passphrase on the key is critical — even if key file is stolen — useless without passphrase.</div>
+
+<h3>Lateral Movement — The Most Dangerous Chain</h3>
+<p>One stolen key can cascade into a full company breach:</p>
+<table>
+  <tr><th>Step</th><th>What happens</th></tr>
+  <tr><td>1</td><td>Attacker steals your SSH key</td></tr>
+  <tr><td>2</td><td>SSHes into your Mac</td></tr>
+  <tr><td>3</td><td>Finds other SSH keys on your Mac for work servers</td></tr>
+  <tr><td>4</td><td>Uses those to SSH into company server</td></tr>
+  <tr><td>5</td><td>Finds database credentials in config files</td></tr>
+  <tr><td>6</td><td>Access to entire company database</td></tr>
+</table>
+
+<h3>SSH Security Findings — Port Scanner Results</h3>
+<table>
+  <tr><th>Finding</th><th>Risk</th><th>Recommendation</th></tr>
+  <tr><td>Port 22 open with password auth enabled</td><td>Brute force risk</td><td>Disable password auth — keys only</td></tr>
+  <tr><td>Port 22 open — root login allowed</td><td>Critical</td><td>Disable root SSH login always</td></tr>
+  <tr><td>Port 22 open on public internet</td><td>Automated attacks</td><td>Move SSH to non-standard port like 2222</td></tr>
+  <tr><td>Key without passphrase</td><td>Stolen key immediately usable</td><td>Always add passphrase to private key</td></tr>
+</table>
+
+<div class="danger"><strong>Remote Login on Mac:</strong> When Remote Login is ON — port 22 is open on your Mac. On public WiFi this is dangerous. Turn it off when not using: System Settings → General → Sharing → Remote Login → OFF.</div>
+</div>
+
+<!-- PART 13 — FTP -->
+<div class="section">
+<h2>Part 13 — FTP — File Transfer Protocol</h2>
+
+<h3>What FTP Does</h3>
+<p>FTP — File Transfer Protocol — is a protocol designed specifically for transferring files between computers over a network. That is its only job — sending and receiving files. You connect to an FTP server, log in with username and password, browse files, and upload or download.</p>
+
+<h3>FTP Uses Two Ports</h3>
+<table>
+  <tr><th>Port</th><th>Purpose</th></tr>
+  <tr><td>21</td><td>Control channel — sends commands — login, list files, navigate directories</td></tr>
+  <tr><td>20</td><td>Data channel — actual file transfer happens here</td></tr>
+</table>
+
+<h3>The Massive Security Problem with FTP</h3>
+<p>FTP is completely unencrypted — like HTTP. Everything travels as plain text. Anyone on the same network running Wireshark can capture your FTP credentials and every file you transfer. Username — visible. Password — visible. Every file — visible.</p>
+
+<div class="danger"><strong>Finding port 21 open during a penetration test = immediate critical finding.</strong> Recommendation: disable FTP entirely and use SFTP instead.</div>
+
+<h3>FTP Replacements — Always Use These Instead</h3>
+<table>
+  <tr><th>Protocol</th><th>Full name</th><th>How it works</th><th>Port</th><th>Use</th></tr>
+  <tr><td>SFTP</td><td>SSH File Transfer Protocol</td><td>Completely different protocol — runs inside SSH tunnel — not FTP at all despite similar name</td><td>22</td><td>Always prefer this</td></tr>
+  <tr><td>FTPS</td><td>FTP Secure</td><td>Original FTP with TLS encryption added on top — like HTTPS is HTTP with TLS</td><td>990</td><td>Acceptable if SFTP not available</td></tr>
+  <tr><td>SCP</td><td>Secure Copy Protocol</td><td>Simple encrypted file transfer via SSH — good for quick transfers</td><td>22</td><td>Quick secure file copies</td></tr>
+</table>
+
+<div class="note"><strong>SFTP is NOT FTP with encryption.</strong> SFTP is a completely separate protocol that happens to transfer files. It was designed from scratch as part of SSH. FTPS is actual FTP with TLS added. Different protocols — different design — same result of secure file transfer.</div>
+
+<h3>Port Scanner — FTP Findings</h3>
+<table>
+  <tr><th>Port found</th><th>Service</th><th>Security action</th></tr>
+  <tr><td>21 open</td><td>FTP — unencrypted</td><td>Critical finding — disable FTP — recommend SFTP</td></tr>
+  <tr><td>22 open</td><td>SSH and SFTP</td><td>Check auth method — disable password auth</td></tr>
+  <tr><td>990 open</td><td>FTPS — encrypted</td><td>Acceptable — verify TLS version is current</td></tr>
+</table>
+</div>
+
+<!-- PART 14 — SMTP -->
+<div class="section">
+<h2>Part 14 — SMTP — Simple Mail Transfer Protocol</h2>
+
+<h3>What SMTP Does</h3>
+<p>SMTP — Simple Mail Transfer Protocol — is the protocol responsible for sending email from one server to another. When you hit Send on Gmail — SMTP carries that email to the recipient's mail server. SMTP only sends — it does not receive.</p>
+
+<h3>Three Email Protocols — Know the Difference</h3>
+<table>
+  <tr><th>Protocol</th><th>Full name</th><th>What it does</th><th>Direction</th></tr>
+  <tr><td>SMTP</td><td>Simple Mail Transfer Protocol</td><td>Sends email — outgoing only</td><td>Outgoing</td></tr>
+  <tr><td>IMAP</td><td>Internet Message Access Protocol</td><td>Receives and syncs email — stays on server</td><td>Incoming</td></tr>
+  <tr><td>POP3</td><td>Post Office Protocol</td><td>Downloads email then deletes from server</td><td>Incoming</td></tr>
+</table>
+
+<h3>SMTP Ports and Encryption Levels</h3>
+<table>
+  <tr><th>Port</th><th>Encryption</th><th>Status</th><th>Risk</th></tr>
+  <tr><td>25</td><td>None — plain text</td><td>Legacy — being phased out</td><td>Emails and credentials visible to anyone capturing traffic</td></tr>
+  <tr><td>587</td><td>STARTTLS — upgrades to encrypted</td><td>Modern standard</td><td>Small window of plain text before upgrade — STARTTLS downgrade attack possible</td></tr>
+  <tr><td>465</td><td>SSL/TLS from start — always encrypted</td><td>Most secure</td><td>Minimal — encrypted from first packet</td></tr>
+  <tr><td>993</td><td>IMAP + SSL</td><td>Secure email receiving</td><td>Minimal</td></tr>
+  <tr><td>995</td><td>POP3 + SSL</td><td>Secure email downloading</td><td>Minimal</td></tr>
+</table>
+
+<h3>Three Email Security Standards — SPF, DKIM, DMARC</h3>
+<table>
+  <tr><th>Standard</th><th>Full name</th><th>What it does</th><th>Protects against</th></tr>
+  <tr><td>SPF</td><td>Sender Policy Framework</td><td>DNS record listing which servers are allowed to send email for your domain</td><td>Email spoofing — attacker pretending to be razorpay.com</td></tr>
+  <tr><td>DKIM</td><td>DomainKeys Identified Mail</td><td>Digitally signs every outgoing email</td><td>Email tampering — verifies email not modified in transit — Integrity</td></tr>
+  <tr><td>DMARC</td><td>Domain-based Message Authentication Reporting and Conformance</td><td>Policy telling receiving servers what to do if SPF or DKIM fail — reject or quarantine</td><td>Enforces anti-spoofing policy — prevents phishing emails reaching inbox</td></tr>
+</table>
+
+<div class="green"><strong>You saw this in your Razorpay recon:</strong> nslookup -type=MX razorpay.com returned aspmx.l.google.com — Google's SMTP servers. Razorpay uses Google Workspace which includes full SPF, DKIM, DMARC protection. This means phishing attacks against Razorpay employees must bypass Google's spam filters — not just Razorpay's own defenses.</div>
+
+<h3>Email Spoofing — Security Attack</h3>
+<p>Attacker sends email pretending to be from razorpay@razorpay.com. Without SPF, DKIM, DMARC — this is trivially easy. With proper configuration — spoofed emails are rejected before reaching the inbox. Finding misconfigured email security = high value finding in penetration tests.</p>
+
+<h3>STARTTLS Downgrade Attack</h3>
+<p>When using port 587 with STARTTLS — connection starts plain text then upgrades to encrypted. Attacker sitting between client and server can intercept before the upgrade happens and force the connection to stay plain text. Defense — use port 465 which is encrypted from the very first packet with no plain text phase.</p>
+</div>
+
+<!-- PART 15 — SSL vs TLS -->
+<div class="section">
+<h2>Part 15 — SSL vs TLS — The Difference</h2>
+
+<h3>What SSL Was</h3>
+<p>SSL — Secure Sockets Layer — was the original encryption protocol invented in 1995 by Netscape. It was designed to secure web communications. Over time serious vulnerabilities were discovered in all versions of SSL — POODLE, BEAST, Heartbleed — making it fundamentally broken and unusable.</p>
+
+<h3>What TLS Is</h3>
+<p>TLS — Transport Layer Security — is the modern replacement for SSL. Redesigned from scratch to fix SSL's vulnerabilities. Actively maintained and updated. TLS 1.3 — released 2018 — is the current standard. Faster, simpler, and more secure than all previous versions.</p>
+
+<table>
+  <tr><th>Protocol</th><th>Year</th><th>Status</th><th>Should you use?</th></tr>
+  <tr><td>SSL 1.0, 2.0, 3.0</td><td>1995–1996</td><td>Dead — broken — multiple critical vulnerabilities</td><td>Never</td></tr>
+  <tr><td>TLS 1.0</td><td>1999</td><td>Deprecated — weak</td><td>No</td></tr>
+  <tr><td>TLS 1.1</td><td>2006</td><td>Deprecated — weak</td><td>No</td></tr>
+  <tr><td>TLS 1.2</td><td>2008</td><td>Still acceptable with correct configuration</td><td>Acceptable</td></tr>
+  <tr><td>TLS 1.3</td><td>2018</td><td>Current standard — use this</td><td>Always prefer</td></tr>
+</table>
+
+<div class="note"><strong>Why people still say SSL:</strong> Habit. The name stuck even though SSL is dead. When someone says "SSL certificate" they actually mean TLS certificate. When your browser shows a padlock — it's using TLS 1.3 — not SSL. The industry uses the terms interchangeably even though they're different things. Always assume TLS when someone says SSL in modern context.</div>
+
+<h3>Security Relevance — Checking TLS Version</h3>
+<p>During a penetration test — one of the first checks is which TLS version a server supports. Server still supporting TLS 1.0 or 1.1 = finding. Server supporting SSL 3.0 = critical finding. Modern servers should only accept TLS 1.2 and 1.3.</p>
+</div>
+
+<!-- PART 16 — PACKET SNIFFING AND WIRESHARK -->
+<div class="section">
+<h2>Part 16 — Packet Sniffing and Wireshark</h2>
+
+<h3>What Packet Sniffing Is</h3>
+<p>Packet sniffing is capturing packets traveling on a network and reading their contents. Like placing a microphone in a room — it records everything passing through. Wireshark is the most widely used free packet capture and analysis tool. Used by security professionals for network analysis and by attackers for credential theft.</p>
+
+<h3>How Attackers Use Wireshark</h3>
+<table>
+  <tr><th>Step</th><th>What happens</th></tr>
+  <tr><td>1</td><td>Attacker connects to same WiFi network as victim</td></tr>
+  <tr><td>2</td><td>Opens Wireshark — starts capturing all network traffic</td></tr>
+  <tr><td>3</td><td>Victim opens http://192.168.1.1 and types admin password</td></tr>
+  <tr><td>4</td><td>Wireshark displays: POST /login username=admin&password=mypassword123</td></tr>
+  <tr><td>5</td><td>Attacker reads credentials directly — no hacking required</td></tr>
+</table>
+
+<div class="danger"><strong>This is a passive attack — completely silent and undetectable.</strong> Attacker sends nothing — only listens. No alerts triggered. No logs created on victim's system. This is why HTTP is so dangerous and why HTTPS is mandatory for any login page.</div>
+
+<h3>HTTP vs HTTPS — What Wireshark Sees</h3>
+<table>
+  <tr><th>Protocol</th><th>What Wireshark captures</th><th>Attacker gets</th></tr>
+  <tr><td>HTTP — port 80</td><td>Complete plain text — every byte readable</td><td>Username, password, session cookies, all content</td></tr>
+  <tr><td>HTTPS — port 443</td><td>Encrypted gibberish — x7k#9@mN2$pQ8...</td><td>Nothing useful — cannot decrypt without key</td></tr>
+</table>
+
+<div class="qa"><strong>Q: Can attacker capture data from home after leaving the cafe WiFi?</strong><br>
+A: No. Packet sniffing only works on the SAME local network you are currently connected to. Once attacker leaves the cafe — different network — cannot see cafe traffic anymore. The attack must happen while physically on the same network. Attacker uses VPN not to steal data remotely — but to hide their identity while performing the attack at the cafe.</div>
+
+<h3>What Router and ISP Can See</h3>
+<table>
+  <tr><th>What they CAN see</th><th>What they CANNOT see</th></tr>
+  <tr><td>Which websites visited — domain names</td><td>What you did inside HTTPS websites</td></tr>
+  <tr><td>Time of each visit</td><td>Your messages, searches, passwords on HTTPS sites</td></tr>
+  <tr><td>How much data transferred</td><td>Content of any encrypted page</td></tr>
+  <tr><td>Which app connected to which server</td><td>Content of end-to-end encrypted apps like WhatsApp</td></tr>
+</table>
+
+<div class="note"><strong>VPN changes everything:</strong> With VPN active — router and ISP see only encrypted traffic going to VPN server. They cannot see which websites you visit or which apps you use. This is why VPN is essential on public WiFi.</div>
+
+<h3>Your Project 2 — Packet Sniffer</h3>
+<p>You will build a Python packet sniffer that captures and displays packets on your own network. This will show you exactly what Wireshark sees — making the concept completely real. Built using the scapy library. Legal on your own network — illegal on others without permission.</p>
+</div>
+
+<!-- PART 17 — SOCKETS -->
+<div class="section">
+<h2>Part 17 — Sockets — Python Network Programming</h2>
+
+<h3>What a Socket Is</h3>
+<p>A socket is an endpoint for sending and receiving data over a network. Think of it like a telephone — you need one on each end to have a conversation. Every network connection you've ever made — HTTP, SSH, FTP, SMTP — uses sockets underneath. When your browser visits google.com — it creates a socket, connects to Google's IP on port 80 or 443, sends an HTTP request, receives the response, closes the socket.</p>
+
+<h3>Socket Analogy</h3>
+<table>
+  <tr><th>Phone call</th><th>Socket equivalent</th></tr>
+  <tr><td>Pick up handset</td><td>socket.socket() — create socket</td></tr>
+  <tr><td>Dial phone number</td><td>IP address</td></tr>
+  <tr><td>Dial extension</td><td>Port number</td></tr>
+  <tr><td>Call connects</td><td>connect_ex() — connection established</td></tr>
+  <tr><td>Talk</td><td>Data being transferred</td></tr>
+  <tr><td>Hang up</td><td>sock.close()</td></tr>
+</table>
+
+<h3>Creating a Socket in Python</h3>
+<table>
+  <tr><th>Code</th><th>What it means</th></tr>
+  <tr><td>import socket</td><td>Import Python's networking module — brings in all socket tools</td></tr>
+  <tr><td>socket.socket(socket.AF_INET, socket.SOCK_STREAM)</td><td>Create a TCP socket — AF_INET means use IPv4 — SOCK_STREAM means use TCP</td></tr>
+  <tr><td>sock.settimeout(1)</td><td>Wait maximum 1 second — if no response in 1 second — give up and move on</td></tr>
+  <tr><td>sock.connect_ex((ip, port))</td><td>Try to connect — returns 0 if success — returns non-zero if failed</td></tr>
+  <tr><td>sock.close()</td><td>Close the connection — always close after use — releases resources</td></tr>
+</table>
+
+<h3>connect vs connect_ex — Critical Difference</h3>
+<table>
+  <tr><th>Method</th><th>What happens on failure</th><th>Use in port scanner</th></tr>
+  <tr><td>sock.connect()</td><td>Raises exception — program crashes if port closed</td><td>No — crashes on first closed port</td></tr>
+  <tr><td>sock.connect_ex()</td><td>Returns error code — program continues — 0=open, non-zero=closed</td><td>Yes — handles closed ports gracefully</td></tr>
+</table>
+
+<div class="note"><strong>Why settimeout(1) is critical:</strong> Without timeout — scanner waits forever on filtered ports — ports where firewall silently drops packets. A scan of 1000 ports could take hours. With 1 second timeout — maximum 1000 seconds for 1000 ports. In practice much faster since most ports respond immediately.</div>
+
+<h3>Complete check_port Function — Line by Line</h3>
+<table>
+  <tr><th>Line</th><th>Plain English explanation</th></tr>
+  <tr><td>sock = socket.socket(AF_INET, SOCK_STREAM)</td><td>Pick up the telephone handset — get ready to make a TCP call using IPv4</td></tr>
+  <tr><td>sock.settimeout(1)</td><td>If nobody answers within 1 second — hang up and move on</td></tr>
+  <tr><td>result = sock.connect_ex((ip, port))</td><td>Dial the number — try to call that IP on that port — store what happened</td></tr>
+  <tr><td>sock.close()</td><td>Hang up the phone — release connection</td></tr>
+  <tr><td>return result == 0</td><td>If result is 0 — someone answered — port OPEN — return True. Otherwise False.</td></tr>
+</table>
+
+<h3>What the Socket Does Under the Hood</h3>
+<p>When you call connect_ex() — your Python code automatically performs the full TCP three-way handshake — SYN, SYN-ACK, ACK — that you already understand from networking theory. If the handshake completes — result = 0 — port is open. If server sends RST — port closed — non-zero result. If no response — timeout — filtered port.</p>
+
+<div class="green"><strong>This is where theory becomes code.</strong> Everything you learned about TCP handshake, ports, and networking — your port scanner code does automatically every time you call connect_ex(). You're not doing anything new — you're writing the code that implements what you already understand.</div>
+
+<h3>Why Library Network Blocked Socket Connections</h3>
+<p>When testing at the library — all ports returned False including Google's port 80 and 443. This is called egress filtering — the library's network blocks outgoing connections to certain ports to control internet access and prevent data exfiltration. This is a legitimate security control used in organizations. At home — ports 80 and 443 on Google will return True — your code is correct.</p>
+
+<h3>Prerequisites Before Building Port Scanner</h3>
+<table>
+  <tr><th>Topic</th><th>Status</th><th>Why needed</th></tr>
+  <tr><td>Functions</td><td>Done</td><td>check_port() is a function</td></tr>
+  <tr><td>For loops</td><td>Done — needs practice</td><td>Loop through all ports to scan</td></tr>
+  <tr><td>Error handling — try/except</td><td>Needs practice</td><td>Handle connection failures without crashing</td></tr>
+  <tr><td>Modules — import</td><td>Needs practice</td><td>import socket, import datetime</td></tr>
+  <tr><td>File I/O</td><td>Needs practice</td><td>Save scan results to file</td></tr>
+  <tr><td>Socket basics</td><td>Just covered</td><td>The core of port scanner</td></tr>
+</table>
+</div>
+
+<!-- PART 18 — WIFI SECURITY AND ZERO TRUST -->
+<div class="section">
+<h2>Part 18 — WiFi Security, Defence in Depth, Zero Trust</h2>
+
+<h3>How WiFi Encryption Works — WPA2 and WPA3</h3>
+<p>WiFi encrypts the wireless radio signal between your device and router using WPA2 — WiFi Protected Access 2 — or WPA3. This protects the signal from outsiders who are not connected to the network. Someone outside the cafe cannot capture and read your WiFi traffic. However WiFi encryption does NOT protect device-to-device communication inside the network.</p>
+
+<h3>Why DHCP Spoofing Works Inside Encrypted WiFi</h3>
+<p>WiFi password = building entrance security. Once inside the building — everyone can talk to everyone in the corridors. WiFi encryption protects the entrance — not what happens inside. Attacker who knows the WiFi password is already inside — WiFi encryption does nothing to stop them from performing DHCP spoofing, ARP poisoning, or packet sniffing inside the network.</p>
+
+<h3>Layers of Protection — Defence in Depth</h3>
+<table>
+  <tr><th>Threat</th><th>Protection layer needed</th></tr>
+  <tr><td>Outsider intercepting WiFi signal</td><td>WPA2/WPA3 — WiFi encryption</td></tr>
+  <tr><td>Insider DHCP spoofing</td><td>DHCP snooping on managed enterprise switches</td></tr>
+  <tr><td>Insider ARP poisoning</td><td>DAI — Dynamic ARP Inspection — on managed switches</td></tr>
+  <tr><td>Insider packet sniffing HTTP</td><td>HTTPS — encrypts content end to end</td></tr>
+  <tr><td>Device-to-device attacks</td><td>Client isolation — 802.1X — network segmentation</td></tr>
+  <tr><td>Any network attack</td><td>VPN — Virtual Private Network — encrypts everything</td></tr>
+</table>
+
+<h3>Zero Trust — The Modern Security Architecture</h3>
+<p>Zero Trust emerged from exactly the gap identified above — devices inside a network should not automatically trust each other just because they're inside. Traditional security assumed inside = trusted. One breach = attacker has access to everything inside.</p>
+
+<p><strong>Zero Trust core principle: "Never trust, always verify — even devices already inside the network."</strong></p>
+
+<table>
+  <tr><th>Traditional security</th><th>Zero Trust</th></tr>
+  <tr><td>Inside network = trusted — outside = not trusted</td><td>Nothing trusted by default — inside or outside</td></tr>
+  <tr><td>Get past the firewall = access everything</td><td>Every device, every user, every connection verified every time</td></tr>
+  <tr><td>One breach = entire network compromised</td><td>One breach = limited blast radius — attacker contained</td></tr>
+  <tr><td>Username + password = full access</td><td>Continuous verification — device health, location, behavior</td></tr>
+</table>
+
+<div class="green"><strong>This is in your Phase 4 roadmap.</strong> Zero Trust architecture is one of the most in-demand skills in enterprise security. Companies like Google, Microsoft, and Cloudflare have fully adopted Zero Trust. Understanding why it exists — from the ground up as you did — makes you more valuable than someone who just knows the buzzword.</div>
+
+<h3>Supply Chain Attacks — Currently Going Viral</h3>
+<p>Supply chain attacks compromise software or tools before they reach you. Instead of breaking in through the front door — attacker hides malware inside software you choose to install and trust. Your defenses see legitimate software — no alerts triggered.</p>
+
+<table>
+  <tr><th>Real attack</th><th>What happened</th><th>Impact</th></tr>
+  <tr><td>XZ Utils 2024</td><td>Contributor spent 2 years building trust — inserted SSH backdoor into compression library used by almost every Linux system</td><td>Would have given attackers SSH access to millions of servers — caught just before going live</td></tr>
+  <tr><td>SolarWinds 2020</td><td>Attackers compromised SolarWinds build system — malicious code inserted into legitimate software updates</td><td>18,000 companies including US government agencies infected — attackers had access for months</td></tr>
+  <tr><td>npm/PyPI packages</td><td>Attackers publish packages with names similar to popular ones — typosquatting</td><td>Developer installs reqeusts instead of requests — malware runs — SSH keys stolen</td></tr>
+</table>
+
+<div class="note"><strong>SSH key theft via supply chain:</strong> Malicious tool reads your ~/.ssh/id_ed25519 and silently sends it to attacker's server. Your defenses see legitimate software running. No alerts. This is exactly why passphrase on SSH keys matters — even if key is stolen this way — attacker cannot use it without the passphrase.</div>
+
+<h3>How Investigators Catch Attackers — Even with Disguise</h3>
+<table>
+  <tr><th>What attacker hides</th><th>What still exposes them</th></tr>
+  <tr><td>Face — mask</td><td>Body shape, height, gait — walking pattern — AI CCTV analysis</td></tr>
+  <tr><td>Identity</td><td>MAC address patterns and device timing signatures</td></tr>
+  <tr><td>Location</td><td>Phone tower data — places them in area even without WiFi connection</td></tr>
+  <tr><td>Money trail — cryptocurrency</td><td>Bitcoin is pseudonymous not anonymous — every transaction on public blockchain — investigators follow money from theft to wallet to exchange to cash out</td></tr>
+</table>
+
+<div class="qa"><strong>Q: Is cryptocurrency anonymous?</strong><br>
+A: Bitcoin is pseudonymous — not anonymous. Every transaction is permanently recorded on the public blockchain — visible to anyone. Investigators follow the money trail: theft → wallet → exchange → cash out. Cash out points — cryptocurrency exchanges — must comply with KYC — Know Your Customer — regulations. They require identity verification. Privacy coins like Monero are harder to trace but not impossible. The moment money is converted to fiat currency — trail becomes much clearer.</div>
+</div>
+
+<!-- PART 19 — COMMON PORTS REFERENCE -->
+<div class="section">
+<h2>Part 19 — Common Ports Reference — Complete List</h2>
+
+<h3>All Ports Your Port Scanner Should Know</h3>
+<table>
+  <tr><th>Port</th><th>Protocol</th><th>Service</th><th>Security significance</th></tr>
+  <tr><td>21</td><td>TCP</td><td>FTP — File Transfer Protocol</td><td>Critical — unencrypted — disable and use SFTP</td></tr>
+  <tr><td>22</td><td>TCP</td><td>SSH — Secure Shell and SFTP</td><td>Check auth method — disable password auth — use keys</td></tr>
+  <tr><td>23</td><td>TCP</td><td>Telnet</td><td>Critical — completely unencrypted — never use — disable immediately</td></tr>
+  <tr><td>25</td><td>TCP</td><td>SMTP — email sending</td><td>Check for open relay — spoofing vulnerabilities</td></tr>
+  <tr><td>53</td><td>TCP/UDP</td><td>DNS — Domain Name System</td><td>Check for open resolver — DNS amplification DDoS abuse</td></tr>
+  <tr><td>80</td><td>TCP</td><td>HTTP — unencrypted web</td><td>Should redirect to 443 — if serving content directly = finding</td></tr>
+  <tr><td>110</td><td>TCP</td><td>POP3 — email receiving</td><td>Unencrypted — use port 995 instead</td></tr>
+  <tr><td>143</td><td>TCP</td><td>IMAP — email receiving</td><td>Unencrypted — use port 993 instead</td></tr>
+  <tr><td>443</td><td>TCP</td><td>HTTPS — encrypted web</td><td>Check TLS version — should be 1.2 or 1.3 minimum</td></tr>
+  <tr><td>465</td><td>TCP</td><td>SMTP over SSL — secure email</td><td>Good — encrypted from start</td></tr>
+  <tr><td>587</td><td>TCP</td><td>SMTP with STARTTLS</td><td>Acceptable — check for STARTTLS downgrade attack</td></tr>
+  <tr><td>993</td><td>TCP</td><td>IMAP over SSL</td><td>Good — encrypted email receiving</td></tr>
+  <tr><td>995</td><td>TCP</td><td>POP3 over SSL</td><td>Good — encrypted email downloading</td></tr>
+  <tr><td>3306</td><td>TCP</td><td>MySQL database</td><td>Critical — database should never be exposed to internet</td></tr>
+  <tr><td>3389</td><td>TCP</td><td>RDP — Remote Desktop Protocol</td><td>High risk — brute force target — use VPN instead</td></tr>
+  <tr><td>8080</td><td>TCP</td><td>HTTP alternate</td><td>Often used for development servers — check if should be public</td></tr>
+  <tr><td>8443</td><td>TCP</td><td>HTTPS alternate</td><td>Often used for admin panels — check if should be public</td></tr>
+  <tr><td>990</td><td>TCP</td><td>FTPS — FTP over SSL</td><td>Acceptable if FTP needed — prefer SFTP on port 22</td></tr>
+</table>
+
+<div class="footer">
+  <span>Aniswar Rath · Networking Notes Part 12 Onwards · May 2026 · SSH · FTP · SMTP · SSL/TLS · Sockets · WiFi Security · Zero Trust</span>
+  <span>Next: Build complete port scanner · Packet sniffer · OOP · Security+ study</span>
+</div>
+</div>
+
+</body>
+</html>
+Displaying networking-notes-part12-onwards.html.
