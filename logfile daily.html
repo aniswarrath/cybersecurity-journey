@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Tracker — Aniswar Rath</title>
+<style>
+:root {
+  --bg: #f4f4f4; --surface: #ffffff; --surface2: #f9f9f9; --border: #e8e8e8;
+  --text: #0a0a0a; --muted: #888; --dim: #bbb;
+  --green: #00aa55; --red: #e02020; --blue: #1a6bb5; --orange: #d16000;
+  --purple: #6633cc; --yellow: #c8a000; --teal: #007a8a;
+  --p1: #1a6bb5; --p2: #6633cc; --p3: #d16000; --p4: #e02020; --buf: #00aa55;
+  --shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.5; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 200; background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; height: 50px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.nav-brand { font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+.nav-brand em { color: var(--green); font-style: normal; }
+.nav-tabs { display: flex; gap: 2px; }
+.nt { padding: 5px 12px; border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; }
+.nt:hover { color: var(--text); background: var(--surface2); }
+.nt.active { background: var(--green); color: #fff; }
+.nav-info { font-size: 10px; color: var(--muted); text-align: right; }
+.nav-info strong { color: var(--green); font-size: 15px; }
+
+/* LAYOUT */
+.page { display: none; max-width: 1120px; margin: 0 auto; padding: 20px; }
+.page.active { display: block; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.g5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+
+/* CARD */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.card-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; }
+
+/* GOAL BANNER */
+.goal { background: var(--text); color: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.goal-left h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.3px; margin-bottom: 4px; }
+.goal-left h2 span { color: #4dffaa; }
+.goal-left p { font-size: 10px; color: #aaa; }
+.goal-stats { display: flex; gap: 20px; flex-shrink: 0; }
+.gs { text-align: center; }
+.gs-v { font-size: 22px; font-weight: 800; color: #4dffaa; line-height: 1; }
+.gs-l { font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* METRIC */
+.metric { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
+.metric-v { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+.metric-l { font-size: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; }
+.metric-s { font-size: 9px; color: var(--dim); margin-top: 3px; }
+
+/* PROGRESS */
+.pb-wrap { margin-bottom: 16px; }
+.pb-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+.pb-name { font-size: 11px; font-weight: 700; }
+.pb-meta { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.pb-pct { font-size: 12px; font-weight: 800; }
+.pb-track { height: 5px; background: #eee; border-radius: 100px; overflow: hidden; margin-bottom: 6px; }
+.pb-fill { height: 100%; border-radius: 100px; transition: width 0.6s ease; }
+.pb-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+.tag { font-size: 8px; padding: 2px 7px; border-radius: 20px; font-weight: 700; }
+.tag-done { background: #e8f8ef; color: var(--green); border: 1px solid #c0e8d0; }
+.tag-wip { background: #fdf8e0; color: var(--yellow); border: 1px solid #ede0a0; }
+.tag-todo { background: #f5f5f5; color: #ccc; border: 1px solid #e8e8e8; }
+
+/* SCHEDULE */
+.sched-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+.sched-row:last-child { border-bottom: none; }
+.sched-time { width: 62px; flex-shrink: 0; font-size: 9px; color: var(--muted); font-weight: 600; }
+
+/* CALENDAR */
+.cal-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.cal-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 5px 13px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; }
+.cal-btn:hover { background: #eee; }
+.cal-month { font-size: 14px; font-weight: 800; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-lbl { text-align: center; font-size: 8px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 5px 0; }
+.cal-day { aspect-ratio: 1; border-radius: 7px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; font-weight: 600; border: 1px solid transparent; transition: all 0.12s; background: var(--surface2); position: relative; color: var(--text); }
+.cal-day:hover { border-color: #ccc; background: #f0f0f0; }
+.cal-day.other { opacity: 0.2; pointer-events: none; }
+.cal-day.is-today { border-color: var(--green) !important; box-shadow: 0 0 0 1px var(--green) inset; }
+.cal-day.committed { background: #e8f8ef; }
+.cal-day.no-commit { background: #fdecea; }
+.cal-day.phase-p1 { border-top: 2px solid var(--p1); }
+.cal-day.phase-p2 { border-top: 2px solid var(--p2); }
+.cal-day.phase-p3 { border-top: 2px solid var(--p3); }
+.cal-day.phase-p4 { border-top: 2px solid var(--p4); }
+.cal-day.phase-buf { border-top: 2px solid var(--buf); }
+.cal-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 2px; }
+.cal-hrs { font-size: 7px; color: var(--muted); margin-top: 1px; }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--muted); }
+.leg-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+/* PANEL */
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 14px; display: none; box-shadow: var(--shadow); }
+.panel.open { display: block; }
+.panel-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.panel-title { font-size: 13px; font-weight: 700; }
+.close-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 5px; cursor: pointer; font-size: 10px; }
+
+/* FORM */
+.fg { margin-bottom: 12px; }
+.fl { font-size: 8px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 4px; display: block; }
+.fi { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-size: 12px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.fi:focus { border-color: var(--green); }
+textarea.fi { resize: vertical; line-height: 1.5; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.score-row { display: flex; gap: 4px; }
+.sb { width: 29px; height: 29px; border-radius: 5px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.12s; }
+.sb:hover { background: #eee; }
+.sb.sel { background: var(--green); border-color: var(--green); color: #fff; }
+.git-row { display: flex; gap: 8px; }
+.gb { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface2); font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s; color: var(--text); }
+.gb.yes.sel { background: var(--green); border-color: var(--green); color: #fff; }
+.gb.no.sel { background: var(--red); border-color: var(--red); color: #fff; }
+.cbr { display: flex; align-items: center; gap: 8px; font-size: 11px; margin: 4px 0; cursor: pointer; }
+.cbr input { accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; }
+.save-btn { background: var(--green); color: #fff; border: none; padding: 11px; border-radius: 7px; font-size: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; width: 100%; margin-top: 12px; }
+.save-btn:hover { background: #009944; }
+
+/* ROADMAP TOPICS */
+.topic-row { display: flex; align-items: center; gap: 10px; padding: 7px 4px; border-bottom: 1px solid #f0f0f0; font-size: 11px; cursor: pointer; border-radius: 4px; transition: background 0.1s; }
+.topic-row:last-child { border-bottom: none; }
+.topic-row:hover { background: var(--surface2); }
+.topic-cb { width: 15px; height: 15px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+.topic-name { flex: 1; line-height: 1.4; color: var(--text); }
+.topic-name.done { text-decoration: line-through; color: var(--dim); }
+.topic-badge { font-size: 8px; padding: 2px 7px; border-radius: 20px; font-weight: 800; flex-shrink: 0; }
+.badge-done { background: #e8f8ef; color: var(--green); }
+.badge-todo { background: #f5f5f5; color: #ccc; }
+.phase-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 5px; display: inline-block; margin-bottom: 10px; }
+
+/* CHARTS */
+.chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.bars { display: flex; gap: 3px; align-items: flex-end; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 1px; }
+.bar-lbl { font-size: 7px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; text-align: center; }
+.bar-val { font-size: 7px; font-weight: 700; }
+
+/* HEATMAP */
+.hm { display: flex; flex-wrap: wrap; gap: 2px; }
+.hm-cell { width: 9px; height: 9px; border-radius: 2px; cursor: pointer; transition: transform 0.1s; flex-shrink: 0; }
+.hm-cell:hover { transform: scale(1.7); z-index: 10; position: relative; }
+
+/* HISTORY */
+.log-item { padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; cursor: pointer; transition: border-color 0.12s; }
+.log-item:hover { border-color: #bbb; }
+.log-item-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.log-date { font-size: 11px; font-weight: 700; }
+.log-meta { display: flex; gap: 10px; font-size: 9px; color: var(--muted); }
+.log-topics { font-size: 10px; color: var(--dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* CERT */
+.cert-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+.cert-row:last-child { border-bottom: none; }
+.cert-name { font-weight: 700; }
+.cert-date { font-size: 9px; color: var(--muted); margin-top: 2px; }
+.cbadge { font-size: 8px; padding: 2px 7px; border-radius: 20px; font-weight: 800; }
+.cb-up { background: #fdf8e0; color: var(--yellow); }
+.cb-fut { background: #f5f5f5; color: #ccc; }
+
+/* SALARY */
+.sal-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sal-yr { width: 38px; font-size: 9px; color: var(--muted); flex-shrink: 0; }
+.sal-bar { height: 18px; border-radius: 3px; display: flex; align-items: center; padding: 0 8px; font-size: 9px; font-weight: 800; min-width: 20px; flex-shrink: 0; }
+.sal-note { font-size: 9px; color: var(--muted); }
+
+/* ALERT */
+.alert { border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 11px; display: none; }
+.alert.show { display: block; }
+.alert-warn { background: #fdecea; border: 1px solid #f0b0b0; color: var(--red); }
+
+/* PROBS */
+.prob-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 16px; }
+.prob-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; box-shadow: var(--shadow); }
+.prob-v { font-size: 24px; font-weight: 800; color: var(--green); line-height: 1; }
+.prob-l { font-size: 9px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+
+/* RULES */
+.rule-list { list-style: none; }
+.rule-item { display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+.rule-item:last-child { border-bottom: none; }
+.rule-num { font-size: 9px; font-weight: 800; color: var(--muted); width: 18px; flex-shrink: 0; }
+
+/* TOOLTIP */
+.tooltip { position: fixed; background: #333; border-radius: 6px; padding: 6px 10px; font-size: 10px; color: #fff; pointer-events: none; z-index: 999; display: none; max-width: 220px; line-height: 1.4; }
+
+@media (max-width: 768px) { .g2,.g3,.g4,.g5,.prob-grid { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } .goal-stats { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">Mission Tracker · <em>Aniswar Rath</em></div>
+  <div class="nav-tabs">
+    <button class="nt active" onclick="showPage('dashboard',this)">Dashboard</button>
+    <button class="nt" onclick="showPage('calendar',this)">Calendar</button>
+    <button class="nt" onclick="showPage('log',this)">Daily Log</button>
+    <button class="nt" onclick="showPage('roadmap',this)">Roadmap</button>
+    <button class="nt" onclick="showPage('history',this)">History</button>
+    <button class="nt" onclick="showPage('progress',this)">Progress</button>
+  </div>
+  <div class="nav-info">Day <strong id="navDay">—</strong> of 400 &nbsp;|&nbsp; <span id="navDate" style="color:var(--muted);font-size:10px;"></span></div>
+</nav>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="page-dashboard" class="page active">
+
+  <div class="goal">
+    <div class="goal-left">
+      <h2>Cloud Pentester <span>→</span> AI Red Teamer <span>→</span> Bug Bounty <span>→</span> Independent Consultant</h2>
+      <p>Globally Elite by 2030 · ₹10L–18L by End 2027 · BCA via IGNOU · Do or Die · No Plan B · No Zero Days</p>
+    </div>
+    <div class="goal-stats">
+      <div class="gs"><div class="gs-v" id="ds-day">—</div><div class="gs-l">Day of 400</div></div>
+      <div class="gs"><div class="gs-v" id="ds-streak">—</div><div class="gs-l">Streak 🔥</div></div>
+      <div class="gs"><div class="gs-v" id="ds-hours">—</div><div class="gs-l">Total Hrs</div></div>
+      <div class="gs"><div class="gs-v" id="ds-p1">—%</div><div class="gs-l">Phase 1</div></div>
+    </div>
+  </div>
+
+  <div id="warnAlert" class="alert alert-warn">⚠️ Failure flags from yesterday. Fix these before starting new topics today.</div>
+
+  <div class="g5" style="margin-bottom:16px;">
+    <div class="metric"><div class="metric-v" id="m-day" style="color:var(--blue)">—</div><div class="metric-l">Day of 400</div><div class="metric-s" id="m-left">— remaining</div></div>
+    <div class="metric"><div class="metric-v" id="m-streak" style="color:var(--green)">—</div><div class="metric-l">GitHub Streak</div><div class="metric-s">consecutive days</div></div>
+    <div class="metric"><div class="metric-v" id="m-hours" style="color:var(--yellow)">—</div><div class="metric-l">Total Hours</div><div class="metric-s">of 4000 target</div></div>
+    <div class="metric"><div class="metric-v" id="m-commits" style="color:var(--teal)">—</div><div class="metric-l">Total Commits</div><div class="metric-s">target: 100+</div></div>
+    <div class="metric"><div class="metric-v" id="m-p1" style="color:var(--p1)">—%</div><div class="metric-l">Phase 1 Done</div><div class="metric-s" id="m-p1-topics">0 / 0 topics</div></div>
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="card">
+        <div class="card-title">Phase Progress — Topic Based · Not Time Based</div>
+
+        <div class="pb-wrap">
+          <div class="pb-header">
+            <div><div class="pb-name" style="color:var(--p1)">Phase 1 — Core Foundations</div><div class="pb-meta">Days 1–80 · 800hrs · Linux + Python + Networking + 2 Projects</div></div>
+            <div class="pb-pct" style="color:var(--p1)" id="p1pct">0%</div>
+          </div>
+          <div class="pb-track"><div class="pb-fill" id="p1bar" style="background:var(--p1);width:0%"></div></div>
+          <div class="pb-tags" id="p1tags"></div>
+        </div>
+
+        <div class="pb-wrap">
+          <div class="pb-header">
+            <div><div class="pb-name" style="color:var(--p2)">Phase 2 — Computer Systems</div><div class="pb-meta">Days 80–153 · 730hrs · C + OS + Data Structures + 2 Projects</div></div>
+            <div class="pb-pct" style="color:var(--p2)" id="p2pct">0%</div>
+          </div>
+          <div class="pb-track"><div class="pb-fill" id="p2bar" style="background:var(--p2);width:0%"></div></div>
+          <div class="pb-tags" id="p2tags"></div>
+        </div>
+
+        <div class="pb-wrap">
+          <div class="pb-header">
+            <div><div class="pb-name" style="color:var(--p3)">Phase 3 — Cloud + Infrastructure</div><div class="pb-meta">Days 153–226 · 730hrs · AWS + Docker + Supply Chain + 1 Project</div></div>
+            <div class="pb-pct" style="color:var(--p3)" id="p3pct">0%</div>
+          </div>
+          <div class="pb-track"><div class="pb-fill" id="p3bar" style="background:var(--p3);width:0%"></div></div>
+          <div class="pb-tags" id="p3tags"></div>
+        </div>
+
+        <div class="pb-wrap">
+          <div class="pb-header">
+            <div><div class="pb-name" style="color:var(--p4)">Phase 4 — Security + AI Red Teaming</div><div class="pb-meta">Days 226–336 · 1100hrs · OWASP + OSCP + AI Red Team + 2 Projects</div></div>
+            <div class="pb-pct" style="color:var(--p4)" id="p4pct">0%</div>
+          </div>
+          <div class="pb-track"><div class="pb-fill" id="p4bar" style="background:var(--p4);width:0%"></div></div>
+          <div class="pb-tags" id="p4tags"></div>
+        </div>
+
+        <div class="pb-wrap">
+          <div class="pb-header">
+            <div><div class="pb-name" style="color:var(--buf)">Buffer — Portfolio + Applications</div><div class="pb-meta">Days 336–400 · 640hrs · 7 Projects · LinkedIn · Applications</div></div>
+            <div class="pb-pct" style="color:var(--buf)" id="bufpct">0%</div>
+          </div>
+          <div class="pb-track"><div class="pb-fill" id="bufbar" style="background:var(--buf);width:0%"></div></div>
+          <div class="pb-tags" id="buftags"></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="chart-wrap" style="margin-bottom:14px;">
+        <div class="card-title" style="margin-bottom:10px;">Hours This Week</div>
+        <div class="bars" id="weekChart" style="height:65px;"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;">
+          <span style="font-size:8px;color:var(--dim)">Mon</span><span style="font-size:8px;color:var(--dim)">Tue</span><span style="font-size:8px;color:var(--dim)">Wed</span><span style="font-size:8px;color:var(--dim)">Thu</span><span style="font-size:8px;color:var(--dim)">Fri</span><span style="font-size:8px;color:var(--dim)">Sat</span><span style="font-size:8px;color:var(--dim)">Sun</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Daily Schedule</div>
+        <div class="sched-row"><span class="sched-time">6:00 AM</span><span>Mind training · meditation · reading · bird watching · 1hr</span></div>
+        <div class="sched-row"><span class="sched-time">7:00 AM</span><span>Fresh up + breakfast · 30m</span></div>
+        <div class="sched-row" style="color:var(--blue)"><span class="sched-time">7:30 AM</span><span>🧠 Deep learning · new concepts · 5 sentences in own words · 3hrs</span></div>
+        <div class="sched-row" style="color:var(--green)"><span class="sched-time">10:30 AM</span><span>⚙️ Build block · hands-on · write code · produce something · 3hrs</span></div>
+        <div class="sched-row"><span class="sched-time">1:30 PM</span><span>Lunch + rest · 1hr · no screens</span></div>
+        <div class="sched-row" style="color:var(--orange)"><span class="sched-time">2:30 PM</span><span>💪 Gym · 1.5hrs · protein after</span></div>
+        <div class="sched-row"><span class="sched-time">4:00 PM</span><span>Fresh up + snack · 30m</span></div>
+        <div class="sched-row" style="color:var(--green)"><span class="sched-time">4:30 PM</span><span>🔧 Debug + extend · 2hrs · 1 commit/day</span></div>
+        <div class="sched-row" style="color:var(--purple)"><span class="sched-time">6:30 PM</span><span>📚 Problem solving · PG boxes · TryHackMe · TJNull list · 1.5hrs</span></div>
+        <div class="sched-row"><span class="sched-time">8:00 PM</span><span>Review + log hours · 30m</span></div>
+        <div class="sched-row"><span class="sched-time">8:30 PM</span><span>Free time · 1hr</span></div>
+        <div class="sched-row"><span class="sched-time">9:00 PM</span><span>Wind down · 30m</span></div>
+        <div class="sched-row"><span class="sched-time">9:30 PM</span><span>Sleep · 8.5hrs</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prob-grid">
+    <div class="prob-card"><div class="prob-v">95%</div><div class="prob-l">Job by end 2027</div></div>
+    <div class="prob-card"><div class="prob-v">75%</div><div class="prob-l">₹10L+ first offer</div></div>
+    <div class="prob-card"><div class="prob-v">88%</div><div class="prob-l">Cloud specialist 2028</div></div>
+    <div class="prob-card"><div class="prob-v">82%</div><div class="prob-l">OSCP first attempt</div></div>
+    <div class="prob-card"><div class="prob-v">85%</div><div class="prob-l">Independent by 2034</div></div>
+  </div>
+</div>
+
+<!-- ===== CALENDAR ===== -->
+<div id="page-calendar" class="page">
+  <div class="card">
+    <div class="cal-nav">
+      <button class="cal-btn" onclick="prevMonth()">← Prev</button>
+      <div class="cal-month" id="calLabel">—</div>
+      <button class="cal-btn" onclick="nextMonth()">Next →</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-lbl">Mon</div><div class="cal-lbl">Tue</div><div class="cal-lbl">Wed</div>
+      <div class="cal-lbl">Thu</div><div class="cal-lbl">Fri</div><div class="cal-lbl">Sat</div><div class="cal-lbl">Sun</div>
+    </div>
+    <div class="cal-grid" id="calGrid" style="margin-top:3px;"></div>
+    <div class="cal-legend">
+      <div class="leg"><div class="leg-dot" style="background:#e8f8ef;border:1px solid #c0e8d0;"></div>Committed</div>
+      <div class="leg"><div class="leg-dot" style="background:#fdecea;border:1px solid #f0b0b0;"></div>No commit</div>
+      <div class="leg"><div class="leg-dot" style="background:#fff;border:2px solid var(--green);"></div>Today</div>
+      <div class="leg"><div class="leg-dot" style="border-top:3px solid var(--p1);background:#f9f9f9;"></div>Phase 1</div>
+      <div class="leg"><div class="leg-dot" style="border-top:3px solid var(--p2);background:#f9f9f9;"></div>Phase 2</div>
+      <div class="leg"><div class="leg-dot" style="border-top:3px solid var(--p3);background:#f9f9f9;"></div>Phase 3</div>
+      <div class="leg"><div class="leg-dot" style="border-top:3px solid var(--p4);background:#f9f9f9;"></div>Phase 4</div>
+      <div class="leg"><div class="leg-dot" style="border-top:3px solid var(--buf);background:#f9f9f9;"></div>Buffer</div>
+    </div>
+  </div>
+  <div class="panel" id="dayPanel">
+    <div class="panel-hdr">
+      <div class="panel-title" id="panelTitle">—</div>
+      <button class="close-btn" onclick="closePanel('dayPanel')">✕ Close</button>
+    </div>
+    <div id="panelContent"></div>
+  </div>
+</div>
+
+<!-- ===== DAILY LOG ===== -->
+<div id="page-log" class="page">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div><div class="card-title" style="margin:0;">Daily Log</div><div style="font-size:12px;font-weight:700;margin-top:2px;" id="logDateLbl">—</div></div>
+      <div style="text-align:right;font-size:10px;color:var(--muted);">Day <strong style="color:var(--green);font-size:14px;" id="logDayNum">—</strong> of 400</div>
+    </div>
+    <div class="form-grid">
+      <div>
+        <div class="fg"><label class="fl">Hours studied today</label><input type="number" class="fi" id="log-hours" placeholder="10" min="0" max="18"></div>
+        <div class="fg"><label class="fl">Topics covered — be specific</label><textarea class="fi" id="log-topics" rows="3" placeholder="e.g. OOP — classes, __init__, self, inheritance, super()..."></textarea></div>
+        <div class="fg"><label class="fl">What I built today</label><textarea class="fi" id="log-built" rows="3" placeholder="e.g. Built check_port() using socket.connect_ex()..."></textarea></div>
+        <div class="fg"><label class="fl">Problems + how I fixed them</label><textarea class="fi" id="log-problems" rows="3" placeholder="What broke? What was the fix? What did you learn?"></textarea></div>
+        <div class="fg"><label class="fl">Tomorrow's specific first task</label><input type="text" class="fi" id="log-tomorrow" placeholder="e.g. Build port scanner with real sockets + file output"></div>
+        <div class="fg"><label class="fl">GitHub commit message</label><input type="text" class="fi" id="log-commit" placeholder="Add OOP - PortScanner class with scan method - May 16"></div>
+        <div class="fg">
+          <label class="fl">Committed to GitHub today?</label>
+          <div class="git-row">
+            <button class="gb yes" id="gb-yes" onclick="selGit('yes')">✅ Yes — Committed</button>
+            <button class="gb no" id="gb-no" onclick="selGit('no')">❌ No — Not Yet</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="fg">
+          <label class="fl">5 Things learned today — from memory only</label>
+          <input type="text" class="fi" id="l1" placeholder="1." style="margin-bottom:5px;">
+          <input type="text" class="fi" id="l2" placeholder="2." style="margin-bottom:5px;">
+          <input type="text" class="fi" id="l3" placeholder="3." style="margin-bottom:5px;">
+          <input type="text" class="fi" id="l4" placeholder="4." style="margin-bottom:5px;">
+          <input type="text" class="fi" id="l5" placeholder="5.">
+        </div>
+        <div class="fg">
+          <label class="fl">Day score — 1 to 10</label>
+          <div class="score-row" id="scoreRow">
+            <button class="sb" onclick="selScore(this,1)">1</button><button class="sb" onclick="selScore(this,2)">2</button>
+            <button class="sb" onclick="selScore(this,3)">3</button><button class="sb" onclick="selScore(this,4)">4</button>
+            <button class="sb" onclick="selScore(this,5)">5</button><button class="sb" onclick="selScore(this,6)">6</button>
+            <button class="sb" onclick="selScore(this,7)">7</button><button class="sb" onclick="selScore(this,8)">8</button>
+            <button class="sb" onclick="selScore(this,9)">9</button><button class="sb" onclick="selScore(this,10)">10</button>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Checklist</label>
+          <label class="cbr"><input type="checkbox" id="chk-gym"> Gym done — protein after</label>
+          <label class="cbr"><input type="checkbox" id="chk-recall"> Morning recall — no notes</label>
+          <label class="cbr"><input type="checkbox" id="chk-screens"> No screens after 9 PM</label>
+          <label class="cbr"><input type="checkbox" id="chk-plan"> Tomorrow's task written — specific</label>
+          <label class="cbr"><input type="checkbox" id="chk-explain"> Explained concepts out loud before moving on</label>
+        </div>
+        <div class="fg">
+          <label class="fl">Failure flags — honest check</label>
+          <label class="cbr"><input type="checkbox" id="f1"> Planned/PDFs instead of coded 2+ hours</label>
+          <label class="cbr"><input type="checkbox" id="f2"> Studied less than 6 hours</label>
+          <label class="cbr"><input type="checkbox" id="f3"> Skipped gym</label>
+          <label class="cbr"><input type="checkbox" id="f4"> Confused 30+ mins without asking help</label>
+          <label class="cbr"><input type="checkbox" id="f5"> Explored alternative paths or future tools</label>
+          <label class="cbr"><input type="checkbox" id="f6"> Social media during study hours</label>
+        </div>
+        <div class="fg">
+          <label class="fl">Mood</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;" id="moodRow">
+            <button class="gb" style="flex:unset;padding:4px 10px;font-size:10px;" onclick="selMood(this,'🔥 Focused')">🔥 Focused</button>
+            <button class="gb" style="flex:unset;padding:4px 10px;font-size:10px;" onclick="selMood(this,'😴 Tired')">😴 Tired</button>
+            <button class="gb" style="flex:unset;padding:4px 10px;font-size:10px;" onclick="selMood(this,'😤 Frustrated')">😤 Frustrated</button>
+            <button class="gb" style="flex:unset;padding:4px 10px;font-size:10px;" onclick="selMood(this,'😊 Good')">😊 Good</button>
+            <button class="gb" style="flex:unset;padding:4px 10px;font-size:10px;" onclick="selMood(this,'😐 Neutral')">😐 Neutral</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveLog()">💾 Save Today's Log</button>
+  </div>
+</div>
+
+<!-- ===== ROADMAP ===== -->
+<div id="page-roadmap" class="page">
+  <div style="background:#e8f8ef;border:1px solid #c0e8d0;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--green);line-height:1.6;">
+    ✅ <strong>Tick any topic to mark complete</strong> — progress syncs instantly to Dashboard · Hours tracked separately — finish topics early = buffer time for the next phase
+  </div>
+  <div class="g2">
+    <div>
+      <div class="card">
+        <div class="phase-label" style="background:#e8f0fb;color:var(--p1);">Phase 1 · Days 1–80 · 800hrs</div>
+        <div id="topics-p1"></div>
+      </div>
+      <div class="card">
+        <div class="phase-label" style="background:#f0ebfb;color:var(--p2);">Phase 2 · Days 80–153 · 730hrs</div>
+        <div id="topics-p2"></div>
+      </div>
+      <div class="card">
+        <div class="phase-label" style="background:#fdf0e0;color:var(--p3);">Phase 3 · Days 153–226 · 730hrs</div>
+        <div id="topics-p3"></div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="phase-label" style="background:#fdecea;color:var(--p4);">Phase 4 · Days 226–336 · 1100hrs</div>
+        <div id="topics-p4"></div>
+      </div>
+      <div class="card">
+        <div class="phase-label" style="background:#e8f8ef;color:var(--buf);">Buffer · Days 336–400 · 640hrs</div>
+        <div id="topics-buf"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Certification Roadmap</div>
+        <div class="cert-row"><div><div class="cert-name">AWS Cloud Practitioner</div><div class="cert-date">Free · Do early in Phase 1 · Highest ROI</div></div><div class="cbadge cb-up">Upcoming</div></div>
+        <div class="cert-row"><div><div class="cert-name">Security+</div><div class="cert-date">Month 4 · Jan 2027 · ~₹18K–22K</div></div><div class="cbadge cb-up">Upcoming</div></div>
+        <div class="cert-row"><div><div class="cert-name">eJPT</div><div class="cert-date">Mid 2027 · ~₹3,500</div></div><div class="cbadge cb-fut">Future</div></div>
+        <div class="cert-row"><div><div class="cert-name">AWS Security Specialty</div><div class="cert-date">End 2027 · ~₹25K</div></div><div class="cbadge cb-fut">Future</div></div>
+        <div class="cert-row"><div><div class="cert-name">OSCP</div><div class="cert-date">Mid 2028 · ~₹90K · Target employer sponsorship</div></div><div class="cbadge cb-fut">Future</div></div>
+        <div class="cert-row"><div><div class="cert-name">OSAI+ — OffSec AI Red Teamer</div><div class="cert-date">2028 · Specific · Rare · Globally recognized</div></div><div class="cbadge cb-fut">Future</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Salary Trajectory</div>
+        <div class="sal-row"><span class="sal-yr">2026</span><div class="sal-bar" style="background:#eee;color:#aaa;width:20px;">₹0</div><span class="sal-note">Building · No income</span></div>
+        <div class="sal-row"><span class="sal-yr">2027★</span><div class="sal-bar" style="background:var(--green);color:#fff;width:140px;">₹10L–18L</div><span class="sal-note" style="color:var(--green)">First job · Tier 1</span></div>
+        <div class="sal-row"><span class="sal-yr">2028</span><div class="sal-bar" style="background:var(--blue);color:#fff;width:190px;">₹25L–40L</div><span class="sal-note" style="color:var(--blue)">OSCP + Cloud</span></div>
+        <div class="sal-row"><span class="sal-yr">2029</span><div class="sal-bar" style="background:var(--purple);color:#fff;width:240px;">$60K–90K+</div><span class="sal-note" style="color:var(--purple)">Remote global</span></div>
+        <div class="sal-row"><span class="sal-yr">2032+</span><div class="sal-bar" style="background:var(--orange);color:#fff;width:290px;">₹1Cr–8Cr</div><span class="sal-note" style="color:var(--orange)">AI security specialist</span></div>
+        <div class="sal-row"><span class="sal-yr">2035+</span><div class="sal-bar" style="background:var(--yellow);color:#000;width:340px;">$200K+</div><span class="sal-note" style="color:var(--yellow)">Top-tier independent</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">10 Non-Negotiable Rules</div>
+        <ul class="rule-list">
+          <li class="rule-item"><span class="rule-num">01</span><span>10 study hrs every day · Sick=5hrs · Travel=3hrs · No zero days</span></li>
+          <li class="rule-item"><span class="rule-num">02</span><span>Build something every day — not just consume</span></li>
+          <li class="rule-item"><span class="rule-num">03</span><span>Stuck 15mins = AI · then understand every line</span></li>
+          <li class="rule-item"><span class="rule-num">04</span><span>Sunday review — learned · broke · built · on pace?</span></li>
+          <li class="rule-item"><span class="rule-num">05</span><span>One project shipped every phase</span></li>
+          <li class="rule-item"><span class="rule-num">06</span><span>Track hours — 4000 by Day 400</span></li>
+          <li class="rule-item"><span class="rule-num">07</span><span>No social media during study hours</span></li>
+          <li class="rule-item"><span class="rule-num">08</span><span>Explain every concept out loud before moving on</span></li>
+          <li class="rule-item"><span class="rule-num">09</span><span>Apply from Day 336 — not before, not after</span></li>
+          <li class="rule-item"><span class="rule-num">10</span><span>1 LinkedIn connection + 1 article per month from today</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HISTORY ===== -->
+<div id="page-history" class="page">
+  <div class="card">
+    <div class="card-title">All Log Entries — Click Any to See Full Details</div>
+    <div id="historyList" style="margin-top:8px;"></div>
+  </div>
+  <div class="panel" id="histPanel">
+    <div class="panel-hdr">
+      <div class="panel-title" id="histPanelTitle">—</div>
+      <button class="close-btn" onclick="closePanel('histPanel')">✕ Close</button>
+    </div>
+    <div id="histPanelContent"></div>
+  </div>
+</div>
+
+<!-- ===== PROGRESS ===== -->
+<div id="page-progress" class="page">
+  <div class="g4" style="margin-bottom:16px;">
+    <div class="metric"><div class="metric-v" id="pg-commits" style="color:var(--green)">0</div><div class="metric-l">Total Commits</div><div class="metric-s">target: 100+</div></div>
+    <div class="metric"><div class="metric-v" id="pg-streak" style="color:var(--yellow)">0</div><div class="metric-l">Current Streak</div><div class="metric-s">consecutive days</div></div>
+    <div class="metric"><div class="metric-v" id="pg-avg" style="color:var(--blue)">0</div><div class="metric-l">Avg hrs/day</div><div class="metric-s">target: 10</div></div>
+    <div class="metric"><div class="metric-v" id="pg-score" style="color:var(--purple)">0</div><div class="metric-l">Avg Day Score</div><div class="metric-s">out of 10</div></div>
+  </div>
+  <div class="g2">
+    <div class="chart-wrap"><div class="card-title" style="margin-bottom:10px;">Daily Hours — Last 30 Days</div><div id="hoursHist" class="bars" style="height:80px;"></div></div>
+    <div class="chart-wrap"><div class="card-title" style="margin-bottom:10px;">Day Score — Last 30 Days</div><div id="scoreHist" class="bars" style="height:80px;"></div></div>
+  </div>
+  <div class="chart-wrap">
+    <div class="card-title" style="margin-bottom:12px;">GitHub Heatmap — All 400 Days</div>
+    <div class="hm" id="heatmap"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;font-size:9px;color:var(--muted);">
+      Less
+      <div style="width:9px;height:9px;background:#eee;border-radius:2px;"></div>
+      <div style="width:9px;height:9px;background:#fdecea;border-radius:2px;"></div>
+      <div style="width:9px;height:9px;background:#c8ead8;border-radius:2px;"></div>
+      <div style="width:9px;height:9px;background:#6dbf97;border-radius:2px;"></div>
+      <div style="width:9px;height:9px;background:var(--green);border-radius:2px;"></div>
+      More
+    </div>
+  </div>
+  <div class="chart-wrap">
+    <div class="card-title" style="margin-bottom:12px;">Phase Topics Completed vs Time Elapsed</div>
+    <div id="paceChart" class="bars" style="height:90px;"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATE UTILS — LOCAL ONLY, NO TIMEZONE ISSUES =====
+const START = [2026, 2, 10]; // [year, month(0-indexed), day]
+
+function today() {
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+
+function dayNum(date) {
+  const s = new Date(START[0], START[1], START[2]);
+  return Math.floor((date - s) / 86400000) + 1;
+}
+
+function dateFromDay(n) {
+  const s = new Date(START[0], START[1], START[2]);
+  return new Date(s.getFullYear(), s.getMonth(), s.getDate() + n - 1);
+}
+
+function dateKey(date) {
+  return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
+}
+
+function phaseForDay(n) {
+  if (n<=80) return 'p1';
+  if (n<=153) return 'p2';
+  if (n<=226) return 'p3';
+  if (n<=336) return 'p4';
+  return 'buf';
+}
+
+function fmtDate(date) {
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return days[date.getDay()]+', '+date.getDate()+' '+months[date.getMonth()]+' '+date.getFullYear();
+}
+
+// ===== STORAGE =====
+const getLogs=()=>JSON.parse(localStorage.getItem('ar-logs')||'{}');
+const saveLogs=l=>localStorage.setItem('ar-logs',JSON.stringify(l));
+const getTopics=()=>JSON.parse(localStorage.getItem('ar-topics')||'{}');
+const saveTopics=t=>localStorage.setItem('ar-topics',JSON.stringify(t));
+
+// ===== TOPICS =====
+const TOPICS = {
+  p1:[
+    {id:'p1-linux',name:'Linux — all commands · permissions · scripting · system_check.sh · myinfo.sh',def:true},
+    {id:'p1-py-basics',name:'Python — variables · strings · f-strings · data types · type conversion · input/print',def:true},
+    {id:'p1-py-operators',name:'Python — all operators · control flow if/elif/else · for/while loops',def:true},
+    {id:'p1-py-functions',name:'Python — functions · def · parameters · return · default params · early return',def:true},
+    {id:'p1-py-lists',name:'Python — lists · methods · slicing · comprehensions',def:true},
+    {id:'p1-py-dicts',name:'Python — dictionaries · nested dicts · .items() · nested loops',def:true},
+    {id:'p1-py-tuples',name:'Python — tuples · immutability · tuple unpacking'},
+    {id:'p1-py-error',name:'Python — error handling · try/except/finally/raise · all error types'},
+    {id:'p1-py-fileio',name:'Python — file I/O · r/w/a/r+ modes · with/as · f.seek()'},
+    {id:'p1-py-modules',name:'Python — modules · import datetime · os · random · time'},
+    {id:'p1-py-sockets',name:'Python — sockets · AF_INET · SOCK_STREAM · connect_ex · settimeout'},
+    {id:'p1-py-oop',name:'Python — OOP · classes · objects · __init__ · self · inheritance · super()'},
+    {id:'p1-net-theory',name:'Networking — OSI 7 layers · DNS · IP · TCP · UDP · HTTP/HTTPS · ARP · ICMP · subnetting',def:true},
+    {id:'p1-net-protocols',name:'Networking — SSH · FTP · SMTP · SSL/TLS · packet sniffing · Wireshark'},
+    {id:'p1-net-adv',name:'Networking — routing · firewalls · VPN · Zero Trust · DDoS · supply chain basics'},
+    {id:'p1-proj1',name:'Project 1 — Port Scanner (Python + sockets) · README + demo video + writeup + lab report'},
+    {id:'p1-proj2',name:'Project 2 — Packet Sniffer (Python + scapy) · README + demo video + writeup + lab report'},
+    {id:'p1-secplus',name:'Security+ study started · Month 4 · Jan 2027 · ~₹18K–22K'},
+    {id:'p1-awsccp',name:'AWS Cloud Practitioner study started · Free · Do early · Highest ROI'},
+  ],
+  p2:[
+    {id:'p2-os',name:'OS concepts — processes · memory stack/heap · scheduling · file systems'},
+    {id:'p2-c',name:'C basics — pointers · malloc · arrays · strings · buffer overflows (CS50x)'},
+    {id:'p2-ds',name:'Data structures — arrays · hash tables · trees · graphs'},
+    {id:'p2-bufover',name:'Buffer overflows at memory level — irreplaceable depth'},
+    {id:'p2-scripts',name:'Python script for every OS concept · AI code review after each'},
+    {id:'p2-proj3',name:'Project 3 — Mini Shell in C · README + demo video + writeup + lab report'},
+    {id:'p2-proj4',name:'Project 4 — Log Monitor with AI anomaly detection · deployed live · BCA final year project'},
+  ],
+  p3:[
+    {id:'p3-aws',name:'AWS — IAM · EC2 · S3 · VPC · CloudTrail · GuardDuty · AWS Free Tier'},
+    {id:'p3-docker',name:'Docker · GitHub Actions CI/CD with security scanning'},
+    {id:'p3-cli',name:'AWS CLI scripting · Terraform · Amazon CodeGuru'},
+    {id:'p3-supply',name:'Supply chain — SBOMs · dependency poisoning · CI/CD pipeline attacks · Semgrep'},
+    {id:'p3-proj5',name:'Project 5 — Cloud Log Analyzer · deployed on real AWS · BCA cloud computing assignment'},
+    {id:'p3-ejpt',name:'eJPT certification · mid 2027 · ~₹3,500'},
+    {id:'p3-awssec',name:'AWS Security Specialty study · end 2027 · ~₹25K'},
+  ],
+  p4:[
+    {id:'p4-auth',name:'Auth · access control · secrets management · Zero Trust'},
+    {id:'p4-owasp',name:'OWASP Top 10 — exploitation level not just theory'},
+    {id:'p4-priv',name:'Privilege escalation · SQLi · XSS · SSRF · cloud misconfigs'},
+    {id:'p4-ir',name:'Incident response — 6-step · tabletop exercises'},
+    {id:'p4-ai-w1',name:'AI Red Teaming Week 1 — Prompt injection at enterprise scale'},
+    {id:'p4-ai-w2',name:'AI Red Teaming Week 2 — Inference endpoint abuse'},
+    {id:'p4-ai-w3',name:'AI Red Teaming Week 3 — LLM jailbreaking for security research'},
+    {id:'p4-ai-w4',name:'AI Red Teaming Week 4 — AI model theft · context manipulation · rogue actions'},
+    {id:'p4-tools',name:'Tools — Splunk SPL · Burp Suite · Nmap · Metasploit · Pacu · Prowler · Nuclei custom templates'},
+    {id:'p4-portswigger',name:'PortSwigger Web Academy — 50% minimum completion'},
+    {id:'p4-htb',name:'HTB — AD first · Easy→Med→Hard · TJNull list'},
+    {id:'p4-htbpro',name:'HTB Pro Labs — Dante + Zephyr · ~$14/mo'},
+    {id:'p4-pg',name:'OffSec PG — 50+ boxes · all Practice + Play · rated 5/5'},
+    {id:'p4-thm',name:'TryHackMe — Jr Pentest path · gaps + reinforcement'},
+    {id:'p4-tcm',name:'TCM Security — Practical Ethical Hacking · ~$30'},
+    {id:'p4-ad',name:'Active Directory — 4 week dedicated block'},
+    {id:'p4-proj6',name:'Project 6 — Security Dashboard (Splunk + Flask + AI) · deployed · writeup on LinkedIn'},
+    {id:'p4-proj7',name:'Project 7 — Web Vuln Scanner (Python + AI + Nuclei) · deployed · writeup on LinkedIn'},
+    {id:'p4-oscp',name:'OSCP certification · mid 2028 · ~₹90K · target employer sponsorship'},
+    {id:'p4-osai',name:'OSAI+ (OffSec AI Red Teamer) · 2028 · specific · rare · recognized'},
+  ],
+  buf:[
+    {id:'buf-projects',name:'All 7 projects · clean READMEs · screenshots · 2+ deployed live'},
+    {id:'buf-labreports',name:'Lab reports — what broke · how fixed · more valuable than cert'},
+    {id:'buf-github',name:'100+ GitHub commits · active graph · AI portfolio audit before first application'},
+    {id:'buf-linkedin',name:'12+ articles by Day 400 · 500+ connections · 1 per day from today'},
+    {id:'buf-ctf',name:'1 CTF writeup + 1 bug bounty writeup published on LinkedIn'},
+    {id:'buf-apply',name:'10+ applications/day from Day 336 · Razorpay · PhonePe · CRED · Cloudflare India · Big4'},
+    {id:'buf-bca',name:'BCA degree leveraged — port scanner=networking · AI detector=AI/ML · cloud analyzer=cloud'},
+  ]
+};
+
+function renderTopics() {
+  const state=getTopics();
+  Object.keys(TOPICS).forEach(phase=>{
+    const container=document.getElementById('topics-'+phase);
+    if(!container)return;
+    container.innerHTML='';
+    TOPICS[phase].forEach(topic=>{
+      const done=state[topic.id]!==undefined?state[topic.id]:(topic.def||false);
+      const row=document.createElement('div');
+      row.className='topic-row';
+      row.innerHTML=`<input type="checkbox" class="topic-cb" id="${topic.id}" ${done?'checked':''}><label for="${topic.id}" class="topic-name ${done?'done':''}">${topic.name}</label><span class="topic-badge ${done?'badge-done':'badge-todo'}">${done?'✓ Done':'To do'}</span>`;
+      row.querySelector('input').addEventListener('change',function(){
+        const s=getTopics();s[topic.id]=this.checked;saveTopics(s);renderTopics();updateAll();
+      });
+      container.appendChild(row);
+    });
+  });
+}
+
+function calcProgress() {
+  const state=getTopics();
+  const r={};
+  Object.keys(TOPICS).forEach(phase=>{
+    const topics=TOPICS[phase];
+    const done=topics.filter(t=>state[t.id]!==undefined?state[t.id]:(t.def||false)).length;
+    r[phase]={done,total:topics.length,pct:Math.round(done/topics.length*100)};
+  });
+  return r;
+}
+
+function updateAll() {
+  const tod=today();
+  const dn=dayNum(tod);
+  const logs=getLogs();
+  const prog=calcProgress();
+
+  document.getElementById('navDay').textContent=dn;
+  document.getElementById('navDate').textContent=fmtDate(tod);
+
+  let totalHours=0,commits=0,scores=[];
+  const allKeys=Object.keys(logs).sort();
+  allKeys.forEach(k=>{
+    const l=logs[k];
+    totalHours+=parseFloat(l.hours)||0;
+    if(l.committed==='yes')commits++;
+    if(l.score)scores.push(parseInt(l.score));
+  });
+
+  let streak=0;
+  for(let i=0;i<400;i++){
+    const d=new Date(tod);d.setDate(tod.getDate()-i);
+    const k=dateKey(d);
+    if(logs[k]&&logs[k].committed==='yes')streak++;
+    else if(i>0)break;
+  }
+
+  document.getElementById('ds-day').textContent=dn;
+  document.getElementById('ds-streak').textContent=streak+'🔥';
+  document.getElementById('ds-hours').textContent=Math.round(totalHours);
+  document.getElementById('ds-p1').textContent=prog.p1.pct+'%';
+  document.getElementById('m-day').textContent=dn;
+  document.getElementById('m-left').textContent=(400-dn)+' days remaining';
+  document.getElementById('m-streak').textContent=streak;
+  document.getElementById('m-hours').textContent=Math.round(totalHours);
+  document.getElementById('m-commits').textContent=commits;
+  document.getElementById('m-p1').textContent=prog.p1.pct+'%';
+  document.getElementById('m-p1-topics').textContent=prog.p1.done+' / '+prog.p1.total+' topics';
+
+  ['p1','p2','p3','p4','buf'].forEach(ph=>{
+    const p=prog[ph];
+    const pe=document.getElementById(ph+'pct');
+    const be=document.getElementById(ph+'bar');
+    const te=document.getElementById(ph+'tags');
+    if(pe)pe.textContent=p.pct+'%';
+    if(be)be.style.width=p.pct+'%';
+    if(te){
+      const state=getTopics();
+      te.innerHTML=TOPICS[ph].slice(0,5).map(t=>{
+        const done=state[t.id]!==undefined?state[t.id]:(t.def||false);
+        const short=t.name.split('—')[0].split('·')[0].replace('Python','Py').replace('Networking','Net').trim().slice(0,20);
+        return`<span class="tag ${done?'tag-done':'tag-todo'}">${short}${done?' ✓':''}</span>`;
+      }).join('');
+    }
+  });
+
+  document.getElementById('logDateLbl').textContent=fmtDate(tod);
+  document.getElementById('logDayNum').textContent=dn;
+
+  renderWeekChart(logs);
+
+  const yesterday=new Date(tod);yesterday.setDate(tod.getDate()-1);
+  const yk=dateKey(yesterday);
+  const w=document.getElementById('warnAlert');
+  if(logs[yk]&&logs[yk].failures&&logs[yk].failures.length>0)w.classList.add('show');
+  else w.classList.remove('show');
+
+  document.getElementById('pg-commits').textContent=commits;
+  document.getElementById('pg-streak').textContent=streak;
+  document.getElementById('pg-avg').textContent=allKeys.length>0?(totalHours/allKeys.length).toFixed(1):0;
+  document.getElementById('pg-score').textContent=scores.length>0?(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1):0;
+
+  const last30=allKeys.slice(-30);
+  renderBarChart('hoursHist',last30.map(k=>({val:parseFloat(logs[k].hours)||0,max:12,color:(parseFloat(logs[k].hours)||0)>=10?'var(--green)':(parseFloat(logs[k].hours)||0)>=6?'var(--yellow)':'var(--red)',label:new Date(k.replace(/-/g,'/')).getDate()})));
+  renderBarChart('scoreHist',last30.map(k=>({val:parseInt(logs[k].score)||0,max:10,color:(parseInt(logs[k].score)||0)>=8?'var(--green)':(parseInt(logs[k].score)||0)>=5?'var(--yellow)':'var(--red)',label:new Date(k.replace(/-/g,'/')).getDate()})));
+
+  renderHeatmap(logs);
+  renderHistory(logs);
+  renderPaceChart(prog,dn);
+}
+
+function renderWeekChart(logs){
+  const c=document.getElementById('weekChart');if(!c)return;
+  c.innerHTML='';
+  const tod=today();
+  const dow=tod.getDay();
+  const mo=new Date(tod);mo.setDate(tod.getDate()-(dow===0?6:dow-1));
+  for(let i=0;i<7;i++){
+    const d=new Date(mo);d.setDate(mo.getDate()+i);
+    const k=dateKey(d);const log=logs[k];
+    const hrs=log?(parseFloat(log.hours)||0):0;
+    const pct=Math.min(hrs/12*100,100);
+    const color=hrs>=10?'var(--green)':hrs>=6?'var(--yellow)':hrs>0?'var(--red)':'#eee';
+    const isT=d.getTime()===tod.getTime();
+    const w=document.createElement('div');
+    w.className='bar-wrap';w.style.height='65px';
+    w.innerHTML=`<div class="bar-val" style="color:${color}">${hrs>0?hrs+'h':''}</div><div class="bar" style="background:${color};height:${Math.max(pct*0.45,hrs>0?3:1)}px;width:100%;${isT?'box-shadow:0 0 0 2px var(--green)':''}"></div>`;
+    c.appendChild(w);
+  }
+}
+
+function renderBarChart(id,data){
+  const c=document.getElementById(id);if(!c)return;
+  c.innerHTML='';
+  if(!data.length){c.innerHTML='<p style="color:var(--dim);font-size:11px;">No data yet.</p>';return;}
+  data.forEach(item=>{
+    const pct=item.max>0?(item.val/item.max)*100:0;
+    const b=document.createElement('div');b.className='bar-wrap';
+    b.innerHTML=`<div class="bar-val" style="color:${item.color}">${item.val||''}</div><div class="bar" style="background:${item.color};height:${Math.max(pct*0.65,item.val>0?3:1)}px;width:100%;"></div><div class="bar-lbl">${item.label}</div>`;
+    c.appendChild(b);
+  });
+}
+
+function renderHeatmap(logs){
+  const c=document.getElementById('heatmap');if(!c)return;
+  c.innerHTML='';
+  const tod=today();
+  for(let n=1;n<=400;n++){
+    const d=dateFromDay(n);const k=dateKey(d);const log=logs[k];
+    const hrs=log?(parseFloat(log.hours)||0):0;
+    const committed=log&&log.committed==='yes';
+    const future=d>tod;
+    let bg='#eee';
+    if(!future){
+      if(committed&&hrs>=10)bg='var(--green)';
+      else if(committed&&hrs>=6)bg='#6dbf97';
+      else if(committed)bg='#c8ead8';
+      else if(log)bg='#fdecea';
+      else bg='#f0f0f0';
+    }
+    const cell=document.createElement('div');
+    cell.className='hm-cell';cell.style.background=bg;
+    const pName={p1:'Phase 1',p2:'Phase 2',p3:'Phase 3',p4:'Phase 4',buf:'Buffer'};
+    cell.title=`Day ${n} · ${fmtDate(d)} · ${hrs}h · ${committed?'✅':'❌'} · ${pName[phaseForDay(n)]}`;
+    cell.addEventListener('mouseover',e=>{
+      const t=document.getElementById('tooltip');
+      t.textContent=cell.title;t.style.display='block';
+      t.style.left=(e.clientX+10)+'px';t.style.top=(e.clientY-40)+'px';
+    });
+    cell.addEventListener('mouseout',()=>{document.getElementById('tooltip').style.display='none';});
+    c.appendChild(cell);
+  }
+}
+
+function renderPaceChart(prog,dn){
+  const c=document.getElementById('paceChart');if(!c)return;
+  c.innerHTML='';
+  const phases=[
+    {name:'Phase 1',days:80,pct:prog.p1.pct,color:'var(--p1)'},
+    {name:'Phase 2',days:73,pct:prog.p2.pct,color:'var(--p2)'},
+    {name:'Phase 3',days:73,pct:prog.p3.pct,color:'var(--p3)'},
+    {name:'Phase 4',days:110,pct:prog.p4.pct,color:'var(--p4)'},
+    {name:'Buffer',days:64,pct:prog.buf.pct,color:'var(--buf)'},
+  ];
+  let dayStart=1;
+  phases.forEach(ph=>{
+    const elapsed=Math.min(Math.max(dn-dayStart,0),ph.days);
+    const timePct=Math.round(elapsed/ph.days*100);
+    const wrap=document.createElement('div');
+    wrap.style.cssText='flex:'+ph.days+';display:flex;flex-direction:column;align-items:center;gap:3px;';
+    wrap.innerHTML=`
+      <div style="font-size:8px;color:${ph.color};font-weight:800;">${ph.pct}% topics</div>
+      <div style="width:100%;height:40px;background:#f0f0f0;border-radius:4px;position:relative;overflow:hidden;">
+        <div style="position:absolute;bottom:0;width:100%;height:${ph.pct}%;background:${ph.color};opacity:0.7;border-radius:4px 4px 0 0;transition:height 0.5s;"></div>
+        <div style="position:absolute;bottom:0;width:2px;left:${timePct}%;height:100%;background:${ph.color};opacity:0.4;"></div>
+      </div>
+      <div style="font-size:8px;color:var(--muted);">${ph.name}</div>
+      <div style="font-size:7px;color:var(--dim);">${timePct}% time</div>
+    `;
+    c.appendChild(wrap);
+    dayStart+=ph.days;
+  });
+}
+
+function renderHistory(logs){
+  const c=document.getElementById('historyList');if(!c)return;
+  const keys=Object.keys(logs).sort().reverse();
+  if(!keys.length){c.innerHTML='<p style="color:var(--dim);font-size:11px;padding:10px 0;">No entries yet. Fill your daily log every evening.</p>';return;}
+  c.innerHTML='';
+  keys.forEach(k=>{
+    const l=logs[k];
+    const parts=k.split('-');
+    const d=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+    const dn=dayNum(d);
+    const item=document.createElement('div');item.className='log-item';
+    item.innerHTML=`<div class="log-item-hdr"><div class="log-date">${fmtDate(d)} — Day ${dn} of 400</div><div class="log-meta"><span style="color:${l.committed==='yes'?'var(--green)':'var(--red)'}">${l.committed==='yes'?'✅ Committed':'❌ No commit'}</span><span style="color:var(--yellow)">${l.hours||0}h</span><span style="color:var(--purple)">Score: ${l.score||'—'}/10</span>${l.mood?`<span style="color:var(--muted)">${l.mood}</span>`:''}</div></div><div class="log-topics">${l.topics||'No topics logged'}</div>`;
+    item.addEventListener('click',()=>showHistDetail(k,l,dn,d));
+    c.appendChild(item);
+  });
+}
+
+function showHistDetail(k,l,dn,d){
+  document.getElementById('histPanelTitle').textContent=fmtDate(d)+' — Day '+dn+' of 400';
+  document.getElementById('histPanelContent').innerHTML=`
+    <div class="g2">
+      <div>
+        <div class="card-title">Hours Studied</div><div style="font-size:22px;font-weight:800;color:var(--yellow);margin-bottom:12px;">${l.hours||'—'}h</div>
+        <div class="card-title">Topics Covered</div><div style="font-size:11px;line-height:1.7;color:#555;margin-bottom:12px;">${l.topics||'—'}</div>
+        <div class="card-title">What I Built</div><div style="font-size:11px;line-height:1.7;color:#555;margin-bottom:12px;">${l.built||'—'}</div>
+        <div class="card-title">Problems + Fixes</div><div style="font-size:11px;line-height:1.7;color:#555;">${l.problems||'—'}</div>
+      </div>
+      <div>
+        <div class="card-title">GitHub</div>
+        <div style="font-size:15px;font-weight:800;color:${l.committed==='yes'?'var(--green)':'var(--red)'};margin-bottom:4px;">${l.committed==='yes'?'✅ Committed & Pushed':'❌ No commit'}</div>
+        ${l.commit?`<div style="font-size:10px;color:var(--muted);margin-bottom:12px;">${l.commit}</div>`:'<div style="margin-bottom:12px;"></div>'}
+        <div class="card-title">Day Score</div><div style="font-size:26px;font-weight:800;color:var(--purple);margin-bottom:12px;">${l.score||'—'}/10</div>
+        <div class="card-title">5 Things Learned</div>
+        <ol style="padding-left:16px;font-size:11px;line-height:2;color:#777;margin-bottom:12px;">
+          ${[l.l1,l.l2,l.l3,l.l4,l.l5].filter(Boolean).map(x=>`<li>${x}</li>`).join('')||'<li style="color:var(--dim)">Not logged</li>'}
+        </ol>
+        <div class="card-title">Tomorrow's Plan</div><div style="font-size:11px;color:#777;">${l.tomorrow||'—'}</div>
+        ${l.failures&&l.failures.length>0?`<div style="margin-top:10px;font-size:10px;color:var(--red);">⚠️ Flags: ${l.failures.join(', ')}</div>`:''}
+      </div>
+    </div>`;
+  const panel=document.getElementById('histPanel');
+  panel.classList.add('open');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ===== FORM =====
+let _score=null,_git=null,_mood=null;
+function selScore(el,val){document.querySelectorAll('#scoreRow .sb').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');_score=val;}
+function selGit(val){_git=val;document.getElementById('gb-yes').classList.toggle('sel',val==='yes');document.getElementById('gb-no').classList.toggle('sel',val==='no');}
+function selMood(el,val){document.querySelectorAll('#moodRow .gb').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');_mood=val;}
+
+function saveLog(){
+  const tod=today();const k=dateKey(tod);const logs=getLogs();
+  const failures=[];
+  if(document.getElementById('f1').checked)failures.push('planned-not-coded');
+  if(document.getElementById('f2').checked)failures.push('under-6hrs');
+  if(document.getElementById('f3').checked)failures.push('skipped-gym');
+  if(document.getElementById('f4').checked)failures.push('confused-30min');
+  if(document.getElementById('f5').checked)failures.push('alt-path');
+  if(document.getElementById('f6').checked)failures.push('social-media');
+  logs[k]={
+    hours:document.getElementById('log-hours').value,
+    topics:document.getElementById('log-topics').value,
+    built:document.getElementById('log-built').value,
+    problems:document.getElementById('log-problems').value,
+    commit:document.getElementById('log-commit').value,
+    committed:_git,score:_score,
+    tomorrow:document.getElementById('log-tomorrow').value,
+    l1:document.getElementById('l1').value,l2:document.getElementById('l2').value,
+    l3:document.getElementById('l3').value,l4:document.getElementById('l4').value,
+    l5:document.getElementById('l5').value,
+    gym:document.getElementById('chk-gym').checked,mood:_mood,failures
+  };
+  saveLogs(logs);updateAll();
+  alert('✅ Log saved for Day '+dayNum(tod)+'\n\nKeep the streak alive. See you tomorrow.');
+}
+
+// ===== CALENDAR =====
+let calY,calM;
+function initCal(){const t=today();calY=t.getFullYear();calM=t.getMonth();}
+function prevMonth(){calM--;if(calM<0){calM=11;calY--;}renderCal();}
+function nextMonth(){calM++;if(calM>11){calM=0;calY++;}renderCal();}
+
+function renderCal(){
+  const logs=getLogs();const tod=today();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calLabel').textContent=months[calM]+' '+calY;
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
+  const first=new Date(calY,calM,1);
+  let startDow=first.getDay();startDow=startDow===0?6:startDow-1;
+  const dim=new Date(calY,calM+1,0).getDate();
+  const prevDim=new Date(calY,calM,0).getDate();
+  for(let i=startDow-1;i>=0;i--){const cell=document.createElement('div');cell.className='cal-day other';cell.textContent=prevDim-i;grid.appendChild(cell);}
+  for(let d=1;d<=dim;d++){
+    const date=new Date(calY,calM,d);const k=dateKey(date);const log=logs[k];
+    const dn=dayNum(date);const phase=phaseForDay(dn);
+    const isT=date.getTime()===tod.getTime();const isFuture=date>tod;
+    const cell=document.createElement('div');cell.className='cal-day';
+    if(isT)cell.classList.add('is-today');
+    if(log&&log.committed==='yes')cell.classList.add('committed');
+    else if(log&&log.committed==='no')cell.classList.add('no-commit');
+    if(dn>=1&&dn<=400)cell.classList.add('phase-'+phase);
+    const hrs=log?(parseFloat(log.hours)||0):0;
+    cell.innerHTML=`<span>${d}</span>${hrs>0?`<span class="cal-hrs">${hrs}h</span>`:''}`;
+    if(log){const dot=document.createElement('div');dot.className='cal-dot';dot.style.background=log.committed==='yes'?'var(--green)':'var(--red)';cell.appendChild(dot);}
+    if(!isFuture){
+      cell.addEventListener('click',()=>{
+        document.getElementById('panelTitle').textContent=fmtDate(date)+' — Day '+dn+' of 400';
+        const pc=document.getElementById('panelContent');
+        if(log){
+          pc.innerHTML=`<div class="g2"><div><div class="card-title">Hours</div><div style="font-size:18px;font-weight:800;color:var(--yellow);margin-bottom:10px;">${log.hours||'—'}h</div><div class="card-title">Topics</div><div style="font-size:11px;color:#555;line-height:1.6;margin-bottom:10px;">${log.topics||'—'}</div><div class="card-title">Built</div><div style="font-size:11px;color:#555;line-height:1.6;">${log.built||'—'}</div></div><div><div class="card-title">GitHub</div><div style="font-size:14px;font-weight:800;color:${log.committed==='yes'?'var(--green)':'var(--red)'};margin-bottom:8px;">${log.committed==='yes'?'✅ Committed':'❌ No commit'}</div>${log.commit?`<div style="font-size:10px;color:var(--muted);margin-bottom:10px;">${log.commit}</div>`:''}<div class="card-title">Score</div><div style="font-size:22px;font-weight:800;color:var(--purple);margin-bottom:10px;">${log.score||'—'}/10</div><div class="card-title">5 Things Learned</div><ol style="padding-left:16px;font-size:11px;line-height:2;color:#777;">${[log.l1,log.l2,log.l3,log.l4,log.l5].filter(Boolean).map(x=>`<li>${x}</li>`).join('')||'<li style="color:var(--dim)">Not logged</li>'}</ol></div></div>`;
+        }else{pc.innerHTML='<p style="color:var(--dim);font-size:12px;padding:10px 0;">No log entry for this day.</p>';}
+        const panel=document.getElementById('dayPanel');panel.classList.add('open');panel.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    }else{cell.style.opacity='0.25';cell.style.cursor='default';}
+    grid.appendChild(cell);
+  }
+  const total=startDow+dim;const rem=total%7===0?0:7-(total%7);
+  for(let d=1;d<=rem;d++){const cell=document.createElement('div');cell.className='cal-day other';cell.textContent=d;grid.appendChild(cell);}
+}
+
+function closePanel(id){document.getElementById(id).classList.remove('open');}
+
+function showPage(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  if(name==='calendar')renderCal();
+}
+
+initCal();
+renderTopics();
+updateAll();
+</script>
+</body>
+</html>

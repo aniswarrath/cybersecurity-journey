@@ -77,7 +77,7 @@ if username != "anish" or password != "secure123":
 elif username == "anish" and password != "secure123":
     print ("Wrong password entered. Try again. ")
 elif username == "anish" and password == "secure123":
-    print ("Access granted. ")'''
+    print ("Access granted. ")
 
 hacker = {
     "name": "Anish",
@@ -130,4 +130,27 @@ scan_results = {
 for ip, ports in scan_results.items():
     print(f"\nIP: {ip}")
     for port in ports:
-        print(f" Port: {port}")
+        print(f" Port: {port}")'''
+
+network_devices = {
+    "device1" : {"ip" : "192.168.29.1", "port" : 22 , "status" : "open"},
+    "device2" : {"ip" : "192.168.29.2", "port" : 21 , "status" : "open"},
+    "device3" : {"ip" : "192.168.29.3", "port" : 20 , "status" : "closed"}
+}
+#type 1 solving- having the common keys for the nested dictionary
+for device , value in network_devices.items():
+    print(f"\n{device}")
+    print(f"{value['ip']} - {value['port']} - {value['status']}")
+#type 2 solving- Trying to do nested loop:
+
+
+network_devices = {
+    "device1" : {"ip" : "192.168.29.1", "port" : 22 , "status" : "open"},
+    "device2" : {"ip" : "192.168.29.2", "port" : 21 , "status" : "open"},
+    "device3" : {"ip" : "192.168.29.3", "port" : 20 , "status" : "closed"}
+}
+
+for device, value in network_devices.items():
+    print(f"\n{device}")
+    for key, values in value.items():
+        print(f"{key} : {values}")

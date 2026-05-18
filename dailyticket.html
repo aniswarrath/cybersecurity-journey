@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; font-size: 11px; max-width: 210mm; margin: 0 auto; padding: 12mm; }
+  h1 { font-size: 18px; font-weight: 700; border-bottom: 3px solid #1a1a1a; padding-bottom: 6px; margin-bottom: 4px; letter-spacing: 1px; }
+  h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #fff; background: #1a1a1a; padding: 4px 8px; margin: 10px 0 6px 0; }
+  h3 { font-size: 10px; font-weight: 700; color: #1a1a1a; margin: 8px 0 4px 0; border-left: 3px solid #1a1a1a; padding-left: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  th { background: #1a1a1a; color: #fff; padding: 4px 6px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 4px 6px; border-bottom: 1px solid #ddd; font-size: 10px; vertical-align: middle; }
+  td:first-child { font-weight: 700; white-space: nowrap; }
+  .goal { background: #1a1a1a; color: #fff; padding: 8px 12px; margin: 6px 0; text-align: center; }
+  .goal-text { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; line-height: 1.7; }
+  .rule { font-size: 11px; font-weight: 700; text-align: center; border: 2px solid #1a1a1a; padding: 5px; margin: 6px 0; }
+  .cb { width: 13px; height: 13px; border: 1.5px solid #1a1a1a; display: inline-block; margin-right: 5px; vertical-align: middle; flex-shrink: 0; }
+  .cbrow { display: flex; align-items: center; font-size: 10px; margin: 3px 0; line-height: 1.4; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .subtitle { color: #666; font-size: 9px; margin-bottom: 8px; }
+  .page { page-break-before: always; padding-top: 10px; }
+  .page-first { padding-top: 0; }
+  .footer { margin-top: 10px; padding-top: 6px; border-top: 2px solid #1a1a1a; font-size: 9px; color: #666; display: flex; justify-content: space-between; }
+  .gym-row td { background: #f0fff4; }
+  .study-row td { background: #f0f7ff; }
+  .build-row td { background: #f5fff0; }
+  .date-box { border: 1.5px solid #1a1a1a; padding: 4px 10px; display: inline-block; font-size: 10px; margin-bottom: 8px; }
+  .warning { background: #fff0f0; border-left: 3px solid #cc0000; padding: 5px 8px; margin: 5px 0; font-size: 10px; }
+  .green-box { background: #f0fff4; border-left: 3px solid #00aa44; padding: 5px 8px; margin: 5px 0; font-size: 10px; }
+  .recall-box { border: 1.5px solid #1a1a1a; padding: 8px; margin: 6px 0; }
+  .recall-line { border-bottom: 1px solid #ddd; height: 20px; margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<!-- FRONT SIDE — DAILY SCHEDULE + MORNING CHECKLIST -->
+<div class="page-first">
+
+<h1>DAILY MISSION SHEET — ANISWAR RATH</h1>
+<div class="subtitle">Cybersecurity Roadmap · 400 Days · github.com/aniswarrath · Print one per day · Tick with pen</div>
+
+<div class="goal">
+  <div class="goal-text">
+    Cloud Pentester → AI Red Teamer → Bug Bounty → Independent Consultant · Globally Elite by 2030<br>
+    <span style="font-size:10px; font-weight:400;">First Job ₹10L–18L by End 2027 · This is my only path · My only mission · No Plan B</span>
+  </div>
+</div>
+
+<div class="rule">THE ONE RULE — NO DAY ENDS WITHOUT A GITHUB COMMIT</div>
+
+<div style="display:flex; gap:20px; margin-bottom:6px;">
+  <div class="date-box">Date: ____________________</div>
+  <div class="date-box">Day ___ of 400</div>
+  <div class="date-box">Hours today: ____</div>
+  <div class="date-box">Total hours: ____</div>
+</div>
+
+<div class="two-col">
+<div>
+  <h2>Daily Schedule</h2>
+  <table>
+    <tr><th>Time</th><th>Block</th><th>✓</th></tr>
+    <tr class="study-row"><td>6:00 AM</td><td>Mind training — meditation · reading · birds</td><td><span class="cb"></span></td></tr>
+    <tr><td>7:00 AM</td><td>Fresh up + breakfast</td><td><span class="cb"></span></td></tr>
+    <tr class="study-row"><td>7:30 AM</td><td>🧠 Deep learning — new concepts · 3 hrs</td><td><span class="cb"></span></td></tr>
+    <tr class="build-row"><td>10:30 AM</td><td>⚙️ Build block — write code · produce · 3 hrs</td><td><span class="cb"></span></td></tr>
+    <tr><td>1:30 PM</td><td>Lunch + rest — no screens</td><td><span class="cb"></span></td></tr>
+    <tr class="gym-row"><td>2:30 PM</td><td>💪 Gym — protein after · non-negotiable</td><td><span class="cb"></span></td></tr>
+    <tr><td>4:00 PM</td><td>Fresh up + snack</td><td><span class="cb"></span></td></tr>
+    <tr class="build-row"><td>4:30 PM</td><td>🔧 Debug + extend — fix bugs · 1 commit · 2 hrs</td><td><span class="cb"></span></td></tr>
+    <tr class="study-row"><td>6:30 PM</td><td>📚 Problem solving — TryHackMe · PG boxes · 1.5 hrs</td><td><span class="cb"></span></td></tr>
+    <tr><td>8:00 PM</td><td>Review + log hours · GitHub commit</td><td><span class="cb"></span></td></tr>
+    <tr><td>8:30 PM</td><td>Free time — earned rest</td><td><span class="cb"></span></td></tr>
+    <tr><td>9:00 PM</td><td>Wind down — no screens</td><td><span class="cb"></span></td></tr>
+    <tr><td>9:30 PM</td><td>Sleep — 8.5 hrs</td><td><span class="cb"></span></td></tr>
+  </table>
+</div>
+
+<div>
+  <h2>Morning Checklist</h2>
+  <div class="cbrow"><span class="cb"></span> Slept 7+ hours last night</div>
+  <div class="cbrow"><span class="cb"></span> Ate proper breakfast</div>
+  <div class="cbrow"><span class="cb"></span> Phone silent — notifications off</div>
+  <div class="cbrow"><span class="cb"></span> VS Code open before anything else</div>
+  <div class="cbrow"><span class="cb"></span> Yesterday's 5 key points recalled — no notes</div>
+
+  <h2>Morning Recall — Write From Memory</h2>
+  <div class="recall-box">
+    <div style="font-size:9px; margin-bottom:4px;">What did I build yesterday? What was hardest? What is today's first topic?</div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+  </div>
+
+  <h2>Today's Target</h2>
+  <div class="recall-box">
+    <div style="font-size:9px; margin-bottom:4px;">What specific topic/code will I complete today?</div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+  </div>
+
+  <h2>End of Day Checklist</h2>
+  <div class="cbrow"><span class="cb"></span> GitHub commit done — add → commit → push</div>
+  <div class="cbrow"><span class="cb"></span> 5 key things written in notebook</div>
+  <div class="cbrow"><span class="cb"></span> Tomorrow's first task written — specific</div>
+  <div class="cbrow"><span class="cb"></span> No screens after 9 PM</div>
+
+  <h2>5 Things Learned Today — Write Now</h2>
+  <div class="recall-box">
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+  </div>
+</div>
+</div>
+
+<div class="footer">
+  <span>Aniswar Rath · Daily Mission Sheet · Print one per day · Tick with pen</span>
+  <span>github.com/aniswarrath · Tomorrow's first task: ____________________</span>
+</div>
+</div>
+
+<!-- BACK SIDE — FAILURE WARNINGS + NOTES -->
+<div class="page">
+
+<h1>DAILY NOTES + FAILURE WARNINGS</h1>
+<div class="subtitle">Back side of daily sheet · Use for notes, diagrams, rough work · Date: ____________________</div>
+
+<h2>Failure Mode Warning System — Check Daily</h2>
+<table>
+  <tr><th>Warning Sign</th><th>Immediate Action</th><th>Me today?</th></tr>
+  <tr><td>No GitHub commit yesterday</td><td>Write 10 lines — commit before anything else today</td><td>□ Yes  □ No</td></tr>
+  <tr><td>2+ hours planning instead of coding</td><td>Close everything — open VS Code — write code now</td><td>□ Yes  □ No</td></tr>
+  <tr><td>Studied less than 6 hours</td><td>Next day minimum 12 hours — no exceptions</td><td>□ Yes  □ No</td></tr>
+  <tr><td>Thinking about future projects during study</td><td>Write in notebook — close thought — return to topic</td><td>□ Yes  □ No</td></tr>
+  <tr><td>Confused 30+ minutes without asking help</td><td>Ask immediately — confusion is not learning</td><td>□ Yes  □ No</td></tr>
+  <tr><td>Skipped gym</td><td>Reschedule same day — gym consolidates learning</td><td>□ Yes  □ No</td></tr>
+  <tr><td>Comparing self to others or exploring alt paths</td><td>Read goal — return to work — no detours</td><td>□ Yes  □ No</td></tr>
+</table>
+
+<div class="two-col" style="margin-top:8px;">
+<div>
+  <h2>Today's Notes / Rough Work</h2>
+  <div style="border: 1px solid #ddd; height: 200px; padding: 6px; font-size: 10px; color: #999;">Use this space for diagrams, rough code, concept sketches...</div>
+
+  <h2 style="margin-top:8px;">What I Built Today</h2>
+  <div class="recall-box">
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+  </div>
+
+  <h2>GitHub Commit Message Today</h2>
+  <div class="recall-box">
+    <div style="font-size:9px; margin-bottom:3px;">Format: "Add [topic] - [what built] - [date]"</div>
+    <div class="recall-line"></div>
+  </div>
+</div>
+
+<div>
+  <h2>Weak Areas to Revisit</h2>
+  <div class="recall-box">
+    <div style="font-size:9px; margin-bottom:4px;">What was unclear today? What needs more practice?</div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+  </div>
+
+  <h2>Questions to Ask Tomorrow</h2>
+  <div class="recall-box">
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+  </div>
+
+  <h2>Tomorrow's Plan</h2>
+  <div class="recall-box">
+    <div style="font-size:9px; margin-bottom:3px;">First task tomorrow — be specific:</div>
+    <div class="recall-line"></div>
+    <div class="recall-line"></div>
+  </div>
+
+  <div class="warning" style="margin-top:8px;"><strong>Miss a day?</strong> Next day = 12 hours minimum. No gentle restarts. No easing back in. Double up immediately.</div>
+
+  <div class="green-box"><strong>Remember:</strong> Linux 100% · Python 70% · Networking 55%. Every day you execute brings you closer to ₹10L+ and globally elite status by 2030.</div>
+</div>
+</div>
+
+<div class="footer">
+  <span>Aniswar Rath · Daily Mission Sheet — Back · Day ___ of 400</span>
+  <span>Total hours logged today: ____ · Cumulative: ____</span>
+</div>
+</div>
+
+</body>
+</html>
