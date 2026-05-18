@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 40px; font-size: 13px; max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 6px; }
+  h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #fff; background: #1a1a1a; padding: 6px 10px; margin: 0 0 10px 0; }
+  h3 { font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 16px 0 6px 0; border-left: 3px solid #1a1a1a; padding-left: 8px; }
+  p { font-size: 13px; line-height: 1.7; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th { background: #f5f5f5; padding: 6px 10px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #ddd; }
+  td { padding: 5px 10px; border-bottom: 1px solid #eee; vertical-align: top; }
+  td:first-child { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
+  pre { background: #f5f5f5; padding: 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 12px; margin-bottom: 12px; overflow-x: auto; border-left: 3px solid #1a1a1a; white-space: pre-wrap; }
+  .note { background: #fffbe6; border-left: 3px solid #f0c000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .danger { background: #fff0f0; border-left: 3px solid #cc0000; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .green { background: #f0fff4; border-left: 3px solid #00aa44; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .qa { background: #f8f8f8; border-left: 3px solid #7F77DD; padding: 8px 12px; margin: 8px 0; font-size: 12px; }
+  .subtitle { color: #666; font-size: 12px; margin-bottom: 20px; }
+  .footer { margin-top: 40px; padding-top: 15px; border-top: 2px solid #1a1a1a; font-size: 11px; color: #666; display: flex; justify-content: space-between; }
+  .section { page-break-before: always; padding-top: 20px; }
+  .section-first { padding-top: 0; }
+  @media print {
+    .section { page-break-before: always; }
+    h2 { page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+    pre { page-break-inside: avoid; }
+    .note, .danger, .green, .qa { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="section-first">
+<h1>Python Notes — Dictionaries · Error Handling · File I/O · Modules · Sockets</h1>
+<div class="subtitle">Aniswar Rath &nbsp;|&nbsp; May 2026 &nbsp;|&nbsp; Complete with all Q&A · Built exercises · Security context throughout</div>
+</div>
+
+<!-- DICTIONARIES -->
+<div class="section">
+<h2>Dictionaries — Complete Reference</h2>
+
+<h3>What a Dictionary Is</h3>
+<p>A dictionary stores data as key-value pairs. Every value has a unique key you use to access it. Like a real dictionary — word is the key, definition is the value. Unlike lists which use index numbers, dictionaries use meaningful keys.</p>
+
+<pre>
+# Basic dictionary
+device = {
+    "ip": "192.168.1.1",
+    "port": 22,
+    "protocol": "TCP",
+    "status": "open"
+}
+
+# Access by key
+print(device["ip"])        # 192.168.1.1
+print(device["port"])      # 22
+</pre>
+
+<h3>All Dictionary Methods</h3>
+<table>
+  <tr><th>Method</th><th>What it does</th><th>Example</th></tr>
+  <tr><td>.keys()</td><td>Returns all keys</td><td>device.keys() → dict_keys(['ip', 'port', ...])</td></tr>
+  <tr><td>.values()</td><td>Returns all values</td><td>device.values() → dict_values(['192.168.1.1', 22, ...])</td></tr>
+  <tr><td>.items()</td><td>Returns key-value pairs as tuples</td><td>for key, val in device.items():</td></tr>
+  <tr><td>.get(key, default)</td><td>Safely get value — returns default if key missing — never crashes</td><td>device.get("port", "Unknown")</td></tr>
+  <tr><td>in</td><td>Check if key exists</td><td>if "ip" in device:</td></tr>
+</table>
+
+<h3>Why .get() Is Better Than Direct Access</h3>
+<pre>
+# Direct access — crashes if key missing
+services[9999]   # KeyError: 9999 — program crashes
+
+# .get() — never crashes
+services.get(9999, "Data not available")   # returns "Data not available"
+
+# How .get() works internally — equivalent to:
+if 9999 in services:
+    return services[9999]
+else:
+    return "Data not available"
+</pre>
+
+<div class="qa"><strong>Q: How does .get() know what to do when key is missing?</strong><br>
+A: You literally tell it with the second argument. services.get(port, "Data not available") means: look for port as a key — if found return its value — if NOT found return "Data not available". The second argument IS the instruction for the missing case. Python doesn't guess — you define the fallback.</div>
+
+<h3>Nested Dictionaries</h3>
+<p>A dictionary where the values are themselves dictionaries. Two levels deep — outer key gets inner dictionary, inner key gets the actual value.</p>
+
+<pre>
+network_scan = {
+    "192.168.1.1": {"port": 80, "status": "open"},
+    "192.168.1.2": {"port": 22, "status": "open"},
+    "192.168.1.3": {"port": 3306, "status": "closed"}
+}
+
+# Access nested value — two levels of indexing
+print(network_scan["192.168.1.1"]["port"])     # 80
+print(network_scan["192.168.1.1"]["status"])   # open
+
+# Loop through nested dictionary
+for ip, value in network_scan.items():
+    print(f"{ip} — port {value['port']} — {value['status']}")
+</pre>
+
+<h3>Nested Loop + Nested Dictionary — Multiple Ports Per Device</h3>
+<pre>
+network = {
+    "192.168.1.1": {80: "HTTP", 443: "HTTPS", 53: "DNS"},
+    "192.168.1.19": {22: "SSH", 8080: "HTTP-ALT"},
+    "192.168.1.30": {21: "FTP", 3306: "MySQL"}
+}
+
+for ip, ports in network.items():
+    print(f"\n{ip}")
+    for port, service in ports.items():
+        print(f"  port {port} — {service}")
+</pre>
+
+<div class="qa"><strong>Q: Why don't we use ['service_name'] when looping through the second dict?</strong><br>
+A: Because the port number IS the key and the service name IS the value. When you write for port, service in ports.items() — port gets the key (80) and service gets the value ("HTTP") directly. No need to index by name because the data IS the key and value themselves. Different from the nested dict where inner keys had explicit names like "port" and "status".</div>
+
+<h3>Real Security Exercise — Port Service Lookup with .get()</h3>
+<pre>
+ports = [80, 443, 22, 21, 3306, 8080, 9999, 135, 25, 53]
+
+services = {
+    80: "HTTP",
+    443: "HTTPS",
+    22: "SSH",
+    21: "FTP",
+    53: "DNS"
+}
+
+for port in ports:
+    service = services.get(port, "Data not available")
+    print(f"Port {port} — {service}")
+
+# Output:
+# Port 80 — HTTP
+# Port 443 — HTTPS
+# Port 22 — SSH
+# Port 21 — FTP
+# Port 3306 — Data not available
+# Port 8080 — Data not available
+# Port 9999 — Data not available
+# Port 135 — Data not available
+# Port 25 — Data not available
+# Port 53 — DNS
+</pre>
+
+<div class="green"><strong>Security context:</strong> This is exactly how a real port scanner maps open ports to known services. If the port is in your known services dictionary — show the name. If not — mark as unknown and investigate further. Unknown ports are often more interesting to attackers than known ones.</div>
+
+<h3>Python Shortcuts That Replace if/else</h3>
+<p>Python provides built-in one-liners for the most common if/else patterns. You will encounter these going forward.</p>
+
+<table>
+  <tr><th>Pattern</th><th>Long way</th><th>Short way</th></tr>
+  <tr><td>Safe dict access</td><td>if key in dict: return dict[key] else: return default</td><td>dict.get(key, default)</td></tr>
+  <tr><td>Filter a list</td><td>for item in list: if condition: result.append(item)</td><td>[item for item in list if condition]</td></tr>
+  <tr><td>Simple assignment</td><td>if x == 0: status = "OPEN" else: status = "CLOSED"</td><td>status = "OPEN" if x == 0 else "CLOSED"</td></tr>
+  <tr><td>Default value</td><td>if hours: total = hours else: total = 0</td><td>total = hours or 0</td></tr>
+</table>
+</div>
+
+<!-- ERROR HANDLING -->
+<div class="section">
+<h2>Error Handling — try · except · finally · raise</h2>
+
+<h3>Why Error Handling Exists</h3>
+<p>Without error handling — any unexpected input crashes your program with an ugly traceback. With error handling — you catch problems gracefully and keep the program running. The difference between if/else and try/except: if/else checks conditions BEFORE code runs. try/except catches crashes DURING code running — things you cannot predict in advance.</p>
+
+<h3>Complete Structure</h3>
+<pre>
+try:
+    # risky code here
+except ValueError:
+    # runs if ValueError occurs
+except ZeroDivisionError:
+    # runs if ZeroDivisionError occurs
+except Exception as e:
+    # catches ANY other error — e tells you what went wrong
+    print(f"Unexpected error: {e}")
+else:
+    # runs ONLY if NO error occurred
+finally:
+    # runs ALWAYS — error or not — use for cleanup
+</pre>
+
+<h3>All Common Error Types</h3>
+<table>
+  <tr><th>Error</th><th>When it happens</th><th>Example</th></tr>
+  <tr><td>ValueError</td><td>Wrong type conversion</td><td>int("hello")</td></tr>
+  <tr><td>ZeroDivisionError</td><td>Dividing by zero</td><td>100 / 0</td></tr>
+  <tr><td>FileNotFoundError</td><td>File does not exist</td><td>open("missing.txt", "r")</td></tr>
+  <tr><td>KeyError</td><td>Dictionary key missing</td><td>dict["nonexistent"]</td></tr>
+  <tr><td>IndexError</td><td>List index out of range</td><td>list[999] on a 3-item list</td></tr>
+  <tr><td>TypeError</td><td>Wrong type for operation</td><td>"hello" + 5</td></tr>
+  <tr><td>ConnectionError</td><td>Network connection failed</td><td>Connecting to unreachable server</td></tr>
+  <tr><td>TimeoutError</td><td>Connection timed out</td><td>Server too slow to respond</td></tr>
+</table>
+
+<h3>Built Exercise — Division with Error Handling</h3>
+<pre>
+try:
+    number = int(input("Enter a number: "))   # ValueError if text entered
+    result = 100 / number                      # ZeroDivisionError if zero
+    print(f"100 / {number} = {result}")
+except ValueError:
+    print("Error — please enter a number not text")
+except ZeroDivisionError:
+    print("Error — cannot divide by zero")
+finally:
+    print("Program finished — this always runs")
+
+# Test inputs:
+# 5     → 100 / 5 = 20.0 → Program finished
+# hello → Error — please enter a number → Program finished
+# 0     → Error — cannot divide by zero → Program finished
+# #     → Error — please enter a number → Program finished (# is a string)
+</pre>
+
+<div class="qa"><strong>Q: If if/else is sufficient — why does try/except exist?</strong><br>
+A: if/else checks conditions BEFORE code runs — things you anticipate. try/except catches crashes DURING code running — things you cannot predict. You cannot write an if statement to handle every possible wrong input. try/except handles anything that crashes at runtime — no matter what it is.</div>
+
+<div class="qa"><strong>Q: Does # count as text for ValueError?</strong><br>
+A: Yes. Everything from input() comes in as a string — letters, numbers, symbols, spaces — all strings. int("#") tries to convert # to integer — fails — ValueError. Python doesn't distinguish between # and "hello" — both are just strings that cannot become integers.</div>
+
+<h3>finally — Always Runs — Cleanup</h3>
+<pre>
+# Without finally — socket might stay open if error occurs
+sock = socket.socket()
+try:
+    result = sock.connect_ex((ip, port))
+except Exception as e:
+    print(f"Error: {e}")
+sock.close()   # might never run if error above
+
+# With finally — socket ALWAYS closes no matter what
+sock = socket.socket()
+try:
+    result = sock.connect_ex((ip, port))
+except Exception as e:
+    print(f"Error: {e}")
+finally:
+    sock.close()   # guaranteed to run always
+</pre>
+
+<h3>raise — Manually Trigger an Error</h3>
+<pre>
+def check_username(username):
+    if username[0].isdigit():
+        raise ValueError("Username cannot start with a number")
+    if len(username) < 3:
+        raise ValueError("Username too short — minimum 3 characters")
+    return True
+
+try:
+    check_username("123anish")
+except ValueError as e:
+    print(f"Invalid username: {e}")
+</pre>
+</div>
+
+<!-- FILE I/O -->
+<div class="section">
+<h2>File I/O — Reading and Writing Files</h2>
+
+<h3>File Opening Modes</h3>
+<table>
+  <tr><th>Mode</th><th>What it does</th><th>File must exist?</th><th>Overwrites?</th></tr>
+  <tr><td>"r"</td><td>Read only</td><td>Yes — FileNotFoundError if missing</td><td>No</td></tr>
+  <tr><td>"w"</td><td>Write — creates or overwrites</td><td>No — creates if missing</td><td>Yes — wipes everything</td></tr>
+  <tr><td>"a"</td><td>Append — adds to end</td><td>No — creates if missing</td><td>No — preserves existing</td></tr>
+  <tr><td>"r+"</td><td>Read AND write</td><td>Yes — must exist</td><td>No — preserves existing</td></tr>
+</table>
+
+<h3>with open() as f — Always Use This</h3>
+<pre>
+# Without with — must close manually — easy to forget
+f = open("log.txt", "w")
+f.write("Aniswar\n")
+f.close()   # if error before this — file never closes
+
+# With with — closes automatically always
+with open("log.txt", "w") as f:
+    f.write("Aniswar\n")
+# file automatically closed here — even if error occurred
+</pre>
+
+<h3>All File Operations — Built and Tested</h3>
+<pre>
+# Exercise 1 — Write
+with open("log.txt", "w") as f:
+    f.write("Aniswar Rath\n")
+    f.write("May 14, 2026\n")
+
+# Exercise 2 — Read
+with open("log.txt", "r") as f:
+    content = f.read()
+    print(content)
+
+# Exercise 3 — Append
+with open("log.txt", "a") as f:
+    f.write("Day 65 of 400\n")
+
+# Exercise 4 — r+ read and write
+with open("log.txt", "r+") as f:
+    content = f.read()        # cursor moves to end
+    f.write("\nNew line")     # writes at end
+    f.seek(0)                 # rewind cursor to start
+    updated = f.read()        # read everything
+    print(updated)
+</pre>
+
+<h3>f.seek() — Moving the File Cursor</h3>
+<p>Think of a file like a cassette tape. Reading moves a playhead along the tape. f.seek() moves the playhead to any position.</p>
+<table>
+  <tr><th>Command</th><th>What it does</th></tr>
+  <tr><td>f.seek(0)</td><td>Move cursor to beginning of file</td></tr>
+  <tr><td>f.seek(10)</td><td>Move cursor to position 10 — 10th byte</td></tr>
+  <tr><td>f.tell()</td><td>Returns current cursor position</td></tr>
+</table>
+
+<h3>Security Use — Save Port Scanner Results</h3>
+<pre>
+open_ports = [22, 80, 443]
+target = "192.168.1.1"
+
+with open("scan_results.txt", "w") as f:
+    f.write(f"Scan results for {target}\n")
+    f.write("=" * 30 + "\n")
+    for port in open_ports:
+        f.write(f"Port {port} — OPEN\n")
+
+print("Results saved to scan_results.txt")
+</pre>
+
+<h3>Error Handling with Files</h3>
+<pre>
+filename = input("Enter filename: ")
+try:
+    with open(filename, "r") as f:
+        content = f.read()
+        print(content)
+except FileNotFoundError:
+    print("Error — file not found")
+finally:
+    print("Operation complete — always runs")
+</pre>
+</div>
+
+<!-- MODULES -->
+<div class="section">
+<h2>Modules — import · datetime · os · random · time</h2>
+
+<h3>What a Module Is</h3>
+<p>A module is a file containing pre-written Python code — functions, tools, variables — that you import and use. Instead of writing everything from scratch — import what you need. Python comes with hundreds of built-in modules.</p>
+
+<h3>Three Ways to Import</h3>
+<pre>
+import datetime                      # import entire module
+from datetime import date            # import specific item only
+import datetime as dt                # import with short alias
+</pre>
+
+<h3>datetime Module</h3>
+<pre>
+import datetime
+
+today = datetime.date.today()
+print(today)                                    # 2026-05-18
+print(today.strftime('%B %d, %Y'))              # May 18, 2026
+
+now = datetime.datetime.now()
+print(now.strftime('%H:%M:%S'))                 # 11:02:59
+</pre>
+
+<h3>strftime Format Codes</h3>
+<table>
+  <tr><th>Code</th><th>Meaning</th><th>Example</th></tr>
+  <tr><td>%B</td><td>Full month name</td><td>May</td></tr>
+  <tr><td>%d</td><td>Day</td><td>18</td></tr>
+  <tr><td>%Y</td><td>4 digit year</td><td>2026</td></tr>
+  <tr><td>%H</td><td>Hour 24hr</td><td>11</td></tr>
+  <tr><td>%M</td><td>Minute</td><td>02</td></tr>
+  <tr><td>%S</td><td>Second</td><td>59</td></tr>
+</table>
+
+<h3>os Module</h3>
+<pre>
+import os
+
+print(os.path.exists("log.txt"))    # True or False
+print(os.getcwd())                   # current directory
+print(os.listdir("."))               # files in directory
+os.makedirs("results", exist_ok=True)  # create folder safely
+</pre>
+
+<h3>random Module</h3>
+<pre>
+import random
+
+port = random.randint(1, 65535)     # random port number
+print(random.choice(["TCP", "UDP", "ICMP"]))  # random choice
+</pre>
+
+<h3>time Module</h3>
+<pre>
+import time
+
+time.sleep(1)    # pause 1 second — useful between scan requests
+
+start = time.time()
+# ... code to measure ...
+end = time.time()
+print(f"Took {end - start:.2f} seconds")
+</pre>
+</div>
+
+<!-- SOCKETS -->
+<div class="section">
+<h2>Sockets — Python Network Programming</h2>
+
+<h3>What a Socket Is</h3>
+<p>A socket is an endpoint for sending and receiving data over a network. Every network connection ever made — HTTP, SSH, FTP, SMTP — uses sockets underneath. When your browser visits google.com — it creates a socket, connects to Google's IP on port 443, sends an HTTP request, receives the response, closes the socket.</p>
+
+<h3>Socket Analogy</h3>
+<table>
+  <tr><th>Phone call</th><th>Socket equivalent</th><th>Python code</th></tr>
+  <tr><td>Pick up handset</td><td>Create socket</td><td>socket.socket(AF_INET, SOCK_STREAM)</td></tr>
+  <tr><td>Dial number</td><td>IP address</td><td>"192.168.1.1"</td></tr>
+  <tr><td>Dial extension</td><td>Port number</td><td>80</td></tr>
+  <tr><td>Set wait time</td><td>Timeout</td><td>sock.settimeout(1)</td></tr>
+  <tr><td>Call connects</td><td>Port open</td><td>connect_ex returns 0</td></tr>
+  <tr><td>Nobody answers</td><td>Port closed or filtered</td><td>connect_ex returns non-zero</td></tr>
+  <tr><td>Hang up</td><td>Close socket</td><td>sock.close()</td></tr>
+</table>
+
+<h3>check_port Function — Line by Line</h3>
+<pre>
+import socket
+
+def check_port(ip, port):
+    try:
+        # Create TCP/IPv4 socket — pick up the phone
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Set timeout — don't wait more than 1 second
+        sock.settimeout(1)
+
+        # Try to connect — dial the number
+        result = sock.connect_ex((ip, port))
+
+        # Hang up — always close
+        sock.close()
+
+        # result == 0 means connection succeeded — port OPEN
+        # result != 0 means connection failed — port CLOSED or FILTERED
+        return result == 0
+
+    except Exception as e:
+        return False   # any unexpected error — treat as closed
+</pre>
+
+<h3>connect vs connect_ex</h3>
+<table>
+  <tr><th>Method</th><th>On failure</th><th>Use in port scanner</th></tr>
+  <tr><td>sock.connect()</td><td>Raises exception — crashes</td><td>No — crashes on first closed port</td></tr>
+  <tr><td>sock.connect_ex()</td><td>Returns error code — continues</td><td>Yes — handles closed ports gracefully</td></tr>
+</table>
+
+<div class="qa"><strong>Q: Why does port scanner need settimeout(1)?</strong><br>
+A: Without timeout — scanner hangs forever on filtered ports where firewall silently drops packets and never responds. One filtered port = scanner freezes completely. With settimeout(1) — waits maximum 1 second — moves on — scan completes in reasonable time.</div>
+
+<h3>DNS Lookup with Socket</h3>
+<pre>
+import socket
+
+ip = socket.gethostbyname("google.com")
+print(f"google.com → {ip}")    # google.com → 142.251.222.142
+</pre>
+
+<div class="note"><strong>Library network blocking:</strong> When testing at the library — all ports returned False including Google's port 80 and 443. This is egress filtering — the library firewall blocks outgoing connections. Your code was correct — the network was the variable. At home — ports 80 and 443 on Google return True.</div>
+</div>
+
+<!-- NEXT — OOP -->
+<div class="section">
+<h2>What's Next — OOP · Object Oriented Programming</h2>
+
+<h3>Why OOP Comes Now</h3>
+<p>Everything you have built so far was procedural — step by step functions and variables scattered across your file. OOP lets you bundle related data and functions together into one neat package called a class. A PortScanner class will contain everything needed to scan — the target, the results, and all the scanning functions — in one organized unit.</p>
+
+<h3>Coming in OOP:</h3>
+<table>
+  <tr><th>Concept</th><th>What it is</th></tr>
+  <tr><td>class</td><td>Blueprint — defines what an object looks like and can do</td></tr>
+  <tr><td>object</td><td>An actual instance built from a class blueprint</td></tr>
+  <tr><td>__init__</td><td>Runs automatically when object is created — sets it up</td></tr>
+  <tr><td>self</td><td>Refers to this specific object — "my" data</td></tr>
+  <tr><td>method</td><td>A function that belongs to a class</td></tr>
+  <tr><td>inheritance</td><td>One class inherits all features of another class</td></tr>
+  <tr><td>super()</td><td>Calls the parent class method from child class</td></tr>
+</table>
+
+<div class="green"><strong>Port scanner in OOP:</strong> Everything you've built — check_port(), file I/O for results, datetime for timestamps, socket connections — will be organized inside a PortScanner class. One clean object that does everything. That's the goal.</div>
+
+<div class="footer">
+  <span>Aniswar Rath · Python Notes · Dictionaries · Error Handling · File I/O · Modules · Sockets · May 2026</span>
+  <span>Next: OOP → Port Scanner → Packet Sniffer → Networking completion</span>
+</div>
+</div>
+
+</body>
+</html>
